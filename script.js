@@ -91,7 +91,7 @@ if (prodPriceUSD) {
 
 async function fetchAndApplyExchangeRate() {
   try {
-    const response = await fetch("http://localhost:5000/api/exchange-rate");
+    const response = await fetch("http://192.168.1.103:5000/api/exchange-rate");
     const data = await response.json();
     currentGlobalExchangeRate = data.exchangeRate;
     
@@ -107,7 +107,7 @@ if (btnSaveExchange) {
     if (!globalExchangeInput) return;
     const newRate = parseFloat(globalExchangeInput.value) || 6.96;
     try {
-      const response = await fetch("http://localhost:5000/api/exchange-rate", {
+      const response = await fetch("http://192.168.1.103:5000/api/exchange-rate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rate: newRate })
@@ -148,7 +148,7 @@ function showView(viewId) {
 async function renderHistoryTable() {
   if (!historyTableBody) return;
   try {
-    const response = await fetch("http://localhost:5000/api/history");
+    const response = await fetch("http://192.168.1.103:5000/api/history");
     const historyData = await response.json();
 
     if (historyData.length === 0) {
@@ -176,7 +176,7 @@ async function renderHistoryTable() {
 
 async function renderDashboard() {
   try {
-    const response = await fetch("http://localhost:5000/api/dashboard-stats");
+    const response = await fetch("http://192.168.1.103:5000/api/dashboard-stats");
     const stats = await response.json();
     if (statSales) statSales.textContent = stats.sales;
     if (statStock) statStock.textContent = stats.stock;
@@ -189,7 +189,7 @@ async function renderDashboard() {
 async function renderInventory() {
   if (!inventoryGrid) return;
   try {
-    const response = await fetch("http://localhost:5000/api/inventory");
+    const response = await fetch("http://192.168.1.103:5000/api/inventory");
     const inventory = await response.json();
 
     if (inventory.length === 0) {
@@ -269,7 +269,7 @@ if (searchInventoryInput) {
 async function populateModelsSelector() {
   if (!selectExistente) return;
   try {
-    const response = await fetch("http://localhost:5000/api/inventory");
+    const response = await fetch("http://192.168.1.103:5000/api/inventory");
     const inventory = await response.json();
 
     selectExistente.innerHTML = `<option value="NUEVO">-- No, es un modelo NUEVO (Digitar todo) --</option>`;
@@ -309,7 +309,7 @@ if (selectExistente) {
       if (prodRamOpt) prodRamOpt.required = false;
 
       try {
-        const response = await fetch("http://localhost:5000/api/inventory");
+        const response = await fetch("http://192.168.1.103:5000/api/inventory");
         const inventory = await response.json();
         const referenceItem = inventory.find(item => `${item.name}|${item.almacenamiento}|${item.ram}` === selectExistente.value);
         if (referenceItem && prodPriceUSD) {
@@ -343,7 +343,7 @@ if (selectExistente) {
 async function renderSalesHistoryView() {
   if (!salesListContainer) return;
   try {
-    const response = await fetch("http://localhost:5000/api/sales");
+    const response = await fetch("http://192.168.1.103:5000/api/sales");
     const salesData = await response.json();
 
     if (salesData.length === 0) {
@@ -420,7 +420,7 @@ if (btnProcessBulkSale) {
     const seller = sessionStorage.getItem("sellerName") || "Admin";
 
     try {
-      const response = await fetch("http://localhost:5000/api/sales", {
+      const response = await fetch("http://192.168.1.103:5000/api/sales", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cartItems: globalCart, seller })
@@ -445,7 +445,7 @@ if (btnProcessBulkSale) {
 
 async function openProductModalByGroup(groupKey) {
   try {
-    const response = await fetch("http://localhost:5000/api/inventory");
+    const response = await fetch("http://192.168.1.103:5000/api/inventory");
     const inventory = await response.json();
 
     const matchingUnits = inventory.filter(item => `${item.name}|${item.almacenamiento}|${item.ram}` === groupKey);
@@ -589,7 +589,7 @@ if (loginForm) {
     const password = formData.get("password").toString().trim();
 
     try {
-      const response = await fetch("http://localhost:5000/api/login", {
+      const response = await fetch("http://192.168.1.103:5000/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password })
@@ -724,7 +724,7 @@ if (addProductForm) {
     };
 
     try {
-      const response = await fetch("http://localhost:5000/api/inventory", {
+      const response = await fetch("http://192.168.1.103:5000/api/inventory", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -761,7 +761,7 @@ if (addProductForm) {
 async function renderUsers() {
   if (!usersList) return;
   try {
-    const response = await fetch("http://localhost:5000/api/users");
+    const response = await fetch("http://192.168.1.103:5000/api/users");
     const registeredUsers = await response.json();
 
     usersList.innerHTML = registeredUsers
@@ -810,7 +810,7 @@ if (userForm) {
     const role = formData.get("role").toString();
 
     try {
-      const response = await fetch("http://localhost:5000/api/users", {
+      const response = await fetch("http://192.168.1.103:5000/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: fullName, username, email, password, role }) // <-- ENVIAR PAQUETE COMPLETO

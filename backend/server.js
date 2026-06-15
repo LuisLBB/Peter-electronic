@@ -328,5 +328,5 @@ app.post("/api/users", async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`Servidor corriendo en http://192.168.1.103:${PORT}`);
 });
