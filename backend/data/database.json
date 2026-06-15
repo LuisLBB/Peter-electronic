@@ -1,0 +1,301 @@
+{
+  "credentials": {
+    "username": "admin1",
+    "password": "peter123"
+  },
+  "registeredUsers": [
+    {
+      "name": "Administrador General",
+      "email": "admin@peter.com",
+      "role": "Administrador"
+    },
+    {
+      "name": "Luis Fernando Quisbert Bohorquez",
+      "username": "lucho1",
+      "email": "luislebo97@gmail.com",
+      "password": "040104",
+      "role": "Vendedor"
+    }
+  ],
+  "inventory": [
+    {
+      "id": 1,
+      "name": "iPhone 16 Pro Max",
+      "price": 9500,
+      "imei": "864201041234567",
+      "color": "Titanio Desierto",
+      "almacenamiento": "256 GB",
+      "ram": "8 GB",
+      "status": "Vendido",
+      "specs": {
+        "pantalla": "6.9 pulgadas OLED",
+        "camara": "48 MP principal + 48 MP Ultra Wide",
+        "bateria": "4685 mAh"
+      }
+    },
+    {
+      "id": 2,
+      "name": "Samsung Galaxy S24 Ultra",
+      "price": 8200,
+      "imei": "358911059876543",
+      "color": "Negro Titanio",
+      "almacenamiento": "512 GB",
+      "ram": "12 GB",
+      "status": "Disponible",
+      "specs": {
+        "pantalla": "6.8 pulgadas Dynamic AMOLED",
+        "camara": "200 MP principal + 50 MP telefoto",
+        "bateria": "5000 mAh"
+      }
+    },
+    {
+      "id": 3,
+      "name": "Poco X8 Pro Max",
+      "price": 4800,
+      "imei": "864578123456789",
+      "color": "Blanco",
+      "almacenamiento": "512 GB",
+      "ram": "12 GB",
+      "status": "Disponible",
+      "specs": {
+        "pantalla": "6,83 Pulgadas AMOLED",
+        "camara": "50 mpx OIS + 8 mpx ultrawide",
+        "bateria": "8500 mAh"
+      }
+    },
+    {
+      "id": 4,
+      "name": "iPhone 16 Pro Max",
+      "price": null,
+      "priceUSD": 1364,
+      "exchangeRate": null,
+      "imei": "897584696315987",
+      "color": "Negro Carbon",
+      "almacenamiento": "256 GB",
+      "ram": "8 GB",
+      "status": "Disponible",
+      "specs": {
+        "pantalla": "6.9 pulgadas OLED",
+        "camara": "48 MP principal + 48 MP Ultra Wide",
+        "bateria": "4685 mAh"
+      }
+    },
+    {
+      "id": 5,
+      "name": "iPhone 16 Pro Max",
+      "price": null,
+      "priceUSD": 1364,
+      "exchangeRate": null,
+      "imei": "854785698521453",
+      "color": "Blanco Lunar",
+      "almacenamiento": "256 GB",
+      "ram": "8 GB",
+      "status": "Disponible",
+      "specs": {
+        "pantalla": "6.9 pulgadas OLED",
+        "camara": "48 MP principal + 48 MP Ultra Wide",
+        "bateria": "4685 mAh"
+      }
+    },
+    {
+      "id": 6,
+      "name": "iPhone 16 Pro Max",
+      "price": null,
+      "priceUSD": 1364,
+      "exchangeRate": null,
+      "imei": "896635244785105",
+      "color": "Rojo Intenso",
+      "almacenamiento": "256 GB",
+      "ram": "8 GB",
+      "status": "Disponible",
+      "specs": {
+        "pantalla": "6.9 pulgadas OLED",
+        "camara": "48 MP principal + 48 MP Ultra Wide",
+        "bateria": "4685 mAh"
+      }
+    },
+    {
+      "id": 7,
+      "name": "Redmi Note 13 Pro + 5G",
+      "price": null,
+      "priceUSD": 320,
+      "exchangeRate": null,
+      "imei": "855470150236985",
+      "color": "Negro Medianoche",
+      "almacenamiento": "512 GB",
+      "ram": "12 RAM",
+      "status": "Disponible",
+      "specs": {
+        "pantalla": "6.67 pulgadas AMOLED",
+        "camara": "200MP Principal OIS",
+        "bateria": "5000 mAh"
+      }
+    },
+    {
+      "id": 8,
+      "name": "Redmi Note 13 Pro + 5G",
+      "price": null,
+      "priceUSD": 320,
+      "exchangeRate": null,
+      "imei": "865369002549054",
+      "color": "Morado lavanda",
+      "almacenamiento": "512 GB",
+      "ram": "12 RAM",
+      "status": "Disponible",
+      "specs": {
+        "pantalla": "6.67 pulgadas AMOLED",
+        "camara": "200MP Principal OIS",
+        "bateria": "5000 mAh"
+      }
+    },
+    {
+      "id": 9,
+      "name": "Redmi Note 13 Pro + 5G",
+      "price": null,
+      "priceUSD": 280,
+      "exchangeRate": null,
+      "imei": "875496002590639",
+      "color": "Negro Medianoche",
+      "almacenamiento": "256 GB",
+      "ram": "8 RAM",
+      "status": "Disponible",
+      "specs": {
+        "pantalla": "6.67 pulgada AMOLED",
+        "camara": "200 MP OIS",
+        "bateria": "5000 mAh"
+      }
+    },
+    {
+      "id": 10,
+      "name": "Redmi Note 13 Pro + 5G",
+      "price": null,
+      "priceUSD": 280,
+      "exchangeRate": null,
+      "imei": "866547002600069",
+      "color": "Blanco Lunar",
+      "almacenamiento": "256 GB",
+      "ram": "8 RAM",
+      "status": "Disponible",
+      "specs": {
+        "pantalla": "6.67 pulgada AMOLED",
+        "camara": "200 MP OIS",
+        "bateria": "5000 mAh"
+      }
+    },
+    {
+      "id": 11,
+      "name": "Redmi Note 13 Pro + 5G",
+      "price": null,
+      "priceUSD": 280,
+      "exchangeRate": null,
+      "imei": "865578490002689",
+      "color": "Midnight Black",
+      "almacenamiento": "256 GB",
+      "ram": "8 RAM",
+      "status": "Disponible",
+      "specs": {
+        "pantalla": "6.67 pulgada AMOLED",
+        "camara": "200 MP OIS",
+        "bateria": "5000 mAh"
+      }
+    }
+  ],
+  "salesHistory": [
+    {
+      "id": 1,
+      "datetime": "15/6/2026, 11:30:46 a. m.",
+      "seller": "Administrador General",
+      "totalPrice": 9500,
+      "products": [
+        {
+          "id": 1,
+          "name": "iPhone 16 Pro Max",
+          "price": 9500,
+          "imei": "864201041234567",
+          "color": "Titanio Desierto",
+          "almacenamiento": "256 GB",
+          "ram": "8 GB"
+        }
+      ]
+    }
+  ],
+  "history": [
+    {
+      "datetime": "15/6/2026, 1:34:28 a. m.",
+      "operation": "Ingreso de Equipo",
+      "productName": "Poco X8 Pro Max (Blanco - 512 GB/12 GB)",
+      "quantity": "IMEI: 864578123456789",
+      "responsible": "Administrador General"
+    },
+    {
+      "datetime": "15/6/2026, 11:30:46 a. m.",
+      "operation": "Venta (Reg Nro: 1)",
+      "productName": "iPhone 16 Pro Max [Titanio Desierto]",
+      "quantity": "IMEI: 864201041234567 (256 GB/8 GB)",
+      "responsible": "Administrador General"
+    },
+    {
+      "datetime": "15/6/2026, 11:31:19 a. m.",
+      "operation": "Ingreso de Equipo",
+      "productName": "iPhone 16 Pro Max (Black Carbon)",
+      "quantity": "IMEI: 865975812345678 ($1364 USD a tc NaN)",
+      "responsible": "Administrador General"
+    },
+    {
+      "datetime": "15/6/2026, 11:48:55 a. m.",
+      "operation": "Ingreso de Equipo",
+      "productName": "iPhone 16 Pro Max (Negro Carbon)",
+      "quantity": "IMEI: 897584696315987 ($1364 USD a tc NaN)",
+      "responsible": "Administrador General"
+    },
+    {
+      "datetime": "15/6/2026, 12:00:49 p. m.",
+      "operation": "Ingreso de Equipo",
+      "productName": "iPhone 16 Pro Max (Blanco Lunar)",
+      "quantity": "IMEI: 854785698521453 ($1364 USD a tc NaN)",
+      "responsible": "Administrador General"
+    },
+    {
+      "datetime": "15/6/2026, 12:01:23 p. m.",
+      "operation": "Ingreso de Equipo",
+      "productName": "iPhone 16 Pro Max (Rojo Intenso)",
+      "quantity": "IMEI: 896635244785105 ($1364 USD a tc NaN)",
+      "responsible": "Administrador General"
+    },
+    {
+      "datetime": "15/6/2026, 12:23:30 p. m.",
+      "operation": "Ingreso de Equipo",
+      "productName": "Redmi Note 13 Pro + 5G (Negro Medianoche)",
+      "quantity": "IMEI: 855470150236985 ($320 USD a tc NaN)",
+      "responsible": "Administrador General"
+    },
+    {
+      "datetime": "15/6/2026, 12:25:24 p. m.",
+      "operation": "Ingreso de Equipo",
+      "productName": "Redmi Note 13 Pro + 5G (Morado lavanda)",
+      "quantity": "IMEI: 865369002549054 ($320 USD a tc NaN)",
+      "responsible": "Administrador General"
+    },
+    {
+      "datetime": "15/6/2026, 12:26:21 p. m.",
+      "operation": "Ingreso de Equipo",
+      "productName": "Redmi Note 13 Pro + 5G (Negro Medianoche)",
+      "quantity": "IMEI: 875496002590639 ($280 USD a tc NaN)",
+      "responsible": "Administrador General"
+    },
+    {
+      "datetime": "15/6/2026, 12:26:49 p. m.",
+      "operation": "Ingreso de Equipo",
+      "productName": "Redmi Note 13 Pro + 5G (Blanco Lunar)",
+      "quantity": "IMEI: 866547002600069 ($280 USD a tc NaN)",
+      "responsible": "Administrador General"
+    },
+    {
+      "datetime": "15/6/2026, 12:27:40 p. m.",
+      "operation": "Ingreso de Equipo",
+      "productName": "Redmi Note 13 Pro + 5G (Midnight Black)",
+      "quantity": "IMEI: 865578490002689 ($280 USD a tc NaN)",
+      "responsible": "Administrador General"
+    }
+  ]
+}

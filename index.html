@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PETER ELECTRONIC | Sistema de Ventas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-card">
+      <p class="tagline">Tecnologia movil a tu alcance</p>
+      <h1>PETER ELECTRONIC</h1>
+      <p class="login-hint">Acceso al panel comercial</p>
+
+      <form id="loginForm" class="login-form" autocomplete="off">
+        <label for="username">Usuario</label>
+        <input id="username" name="username" type="text" placeholder="Ingresa tu usuario" required />
+
+        <label for="password">Contrasena</label>
+        <input id="password" name="password" type="password" placeholder="Ingresa tu contrasena" required />
+
+        <button type="submit" class="btn btn-primary">Ingresar</button>
+        <p id="loginError" class="form-error" aria-live="polite"></p>
+      </form>
+      <p class="cred-note">Demo: usuario admin1 / clave peter123</p>
+    </div>
+  </div>
+
+  <div id="app" class="app-shell is-hidden">
+    <header class="topbar">
+      <div class="brand">
+        <h2>PETER ELECTRONIC</h2>
+        <p>Tecnologia movil a tu alcance</p>
+        <p style="font-size:0.8rem; opacity:0.8;">T.C. Sistema: <span id="dashboardExchangeRate">Bs. 6.96</span></p>
+      </div>
+
+      <nav class="topbar-nav" aria-label="Navegacion principal">
+        <button class="nav-link is-active" data-view="inicio">Inicio</button>
+        <button class="nav-link" data-view="inventario">Inventario</button>
+        <button class="nav-link" data-view="ventasRegistradas">Ventas Detalladas</button>
+        <button class="nav-link" data-view="usuarios">Registro de Usuarios</button>
+        <button class="nav-link" data-view="historial">Historial</button>
+        <button id="logoutBtn" class="btn btn-logout">Cerrar Sesion</button>
+      </nav>
+    </header>
+
+    <main class="main-content">
+      <section id="inicio" class="view is-visible" aria-labelledby="tituloInicio">
+        <div class="section-head">
+          <h3 id="tituloInicio">Resumen Ejecutivo</h3>
+          <p>Rendimiento comercial en tiempo real basados en IMEIs individuales.</p>
+        </div>
+
+        <div class="stats-grid" id="statsGrid">
+          <article class="stat-card">
+            <h4>Equipos Vendidos</h4>
+            <p id="statSales" class="stat-number">0</p>
+          </article>
+
+          <article class="stat-card">
+            <h4>Artículos Disponibles</h4>
+            <p id="statStock" class="stat-number">0</p>
+          </article>
+
+          <article class="stat-card">
+            <h4>Ingresos del Periodo</h4>
+            <p id="statRevenue" class="stat-number">Bs. 0.00</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="inventario" class="view" aria-labelledby="tituloInventario">
+        <div class="section-head" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; background: rgba(0,0,0,0.01); padding: 15px; border-radius: 8px; border: 1px solid var(--gray-200);">
+          <div style="flex: 1; min-width: 280px;">
+            <h3 id="tituloInventario">Inventario General</h3>
+            <p>Catálogo comercial agrupado por modelo y características base.</p>
+            <input id="searchInventoryInput" type="text" placeholder="Buscar modelo..." style="padding: 8px; width: 250px; border-radius: 6px; border: 1px solid #ccc; margin-top: 10px;" />
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: 8px; background: var(--white); padding: 10px; border-radius: 6px; border: 1px solid #2a9d8f;">
+            <label style="font-size: 0.8rem; font-weight: 700; color: #264653;">TIPO DE CAMBIO EN VIVO (Bs.)</label>
+            <div style="display: flex; gap: 6px;">
+              <input id="globalExchangeInput" type="number" step="0.01" value="6.96" style="padding: 6px; width: 90px; border-radius: 4px; border: 1px solid #ccc; font-weight: 700; text-align: center;" />
+              <button id="btnSaveExchange" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.85rem; background: #2a9d8f;">Actualizar Precios</button>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; align-items: center; justify-content: flex-end; width: 100%;">
+            <button id="openAddModalBtn" class="btn btn-primary">+ Añadir nuevo IMEI</button>
+            <button id="btnProcessBulkSale" class="btn btn-primary" style="background: linear-gradient(145deg, #2a9d8f, #264653); font-weight: 700;">
+              🛒 Procesar Venta Global (<span id="cartCount">0</span>)
+            </button>
+          </div>
+        </div>
+
+        <div id="inventoryGrid" class="inventory-grid"></div>
+      </section>
+
+      <section id="ventasRegistradas" class="view" aria-labelledby="tituloVentasReg">
+        <div class="section-head">
+          <h3>Registro Integrado de Ventas Múltiples</h3>
+          <p>Auditoría completa de salidas de caja y desglose de IMEIs asignados.</p>
+          <input id="searchSalesInput" type="text" placeholder="Filtrar por modelo..." style="padding: 8px; width: 250px; border-radius: 6px; border: 1px solid #ccc; margin-top: 10px;" />
+        </div>
+        <div id="salesListContainer" style="display: flex; flex-direction: column; gap: 15px;"></div>
+      </section>
+
+      <section id="usuarios" class="view" aria-labelledby="tituloUsuarios">
+        <div class="section-head">
+          <h3 id="tituloUsuarios">Registro de Usuarios</h3>
+          <p>Alta rapida de personal para el sistema.</p>
+        </div>
+
+        <div class="users-layout">
+          <form id="userForm" class="user-form" autocomplete="off">
+            <label for="fullName">Nombre completo</label>
+            <input id="fullName" name="fullName" type="text" required placeholder="Ej: Maria Torres" pattern="[A-Za-zÁéíóúÁÉÍÓÚñÑ ]+" title="Este campo solo permite letras y espacios, no números." />
+
+            <label for="newUsername">Nombre de Usuario (Para ingresar)</label>
+            <input id="newUsername" name="newUsername" type="text" required placeholder="Ej: mtorres" pattern="[A-Za-z0-9_]+" title="El nombre de usuario solo permite letras, números y guiones bajos (sin espacios)." />
+
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" required placeholder="correo@empresa.com" />
+
+            <label for="newPassword">Contraseña</label>
+            <input id="newPassword" name="newPassword" type="password" required minlength="6" placeholder="Mínimo 6 caracteres" />
+
+            <label for="role">Rol</label>
+            <select id="role" name="role" required>
+              <option value="" disabled selected>Selecciona un rol</option>
+              <option value="Administrador">Administrador</option>
+              <option value="Vendedor">Vendedor</option>
+            </select>
+
+            <button type="submit" class="btn btn-primary">Registrar Usuario</button>
+            <p id="userMessage" class="form-message" aria-live="polite"></p>
+          </form>
+
+          <aside class="user-panel">
+            <h4>Personal Registrado</h4>
+            <ul id="usersList" class="users-list"></ul>
+          </aside>
+        </div>
+      </section>
+
+      <section id="historial" class="view" aria-labelledby="tituloHistorial">
+        <div class="section-head">
+          <h3 id="tituloHistorial">Historial de Movimientos</h3>
+          <p>Auditoría completa de salidas, ingresos y préstamos de stock en tiempo real.</p>
+        </div>
+        <div style="background: var(--white); border-radius: var(--radius-md); box-shadow: var(--soft-shadow); padding: 18px; overflow-x: auto; border: 1px solid var(--gray-200);">
+          <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
+            <thead>
+              <tr style="background: var(--gray-900); color: var(--white); border-bottom: 2px solid var(--gray-700);">
+                <th style="padding: 12px;">Fecha y Hora</th>
+                <th style="padding: 12px;">Operación</th>
+                <th style="padding: 12px;">Equipo / Datos</th>
+                <th style="padding: 12px;">IMEI / Atributos</th>
+                <th style="padding: 12px;">Responsable</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="detailModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button id="closeModalBtn" class="modal-close" aria-label="Cerrar">x</button>
+      <h4 id="modalTitle">Ficha del Modelo</h4>
+      <div id="modalBody" class="modal-body"></div>
+      
+      <div id="modalActionContainer" style="margin-top: 20px; border-top: 1px solid var(--gray-200); padding-top: 15px;">
+        <div style="display: flex; gap: 10px; align-items: center; justify-content: center;">
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <label style="font-size:0.8rem; font-weight:700; color:var(--gray-600);">Cantidad a Vender:</label>
+            <input id="inputSaleQty" type="number" min="1" value="1" style="width: 80px; padding: 8px; text-align: center; font-size: 1.1rem; font-weight:700; border: 1px solid var(--gray-300); border-radius: 6px;" />
+          </div>
+          <button id="btnAddToCart" class="btn btn-primary" style="flex:1; margin-top:20px; background: linear-gradient(145deg, #2a9d8f, #264653);">
+            🛒 Añadir al Carrito Global
+          </button>
+        </div>
+        <p id="sellMessage" style="font-weight: 600; text-align: center; margin-top: 10px; min-height: 18px;"></p>
+      </div>
+    </div>
+  </div>
+
+  <div id="addModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="addModalTitle">
+      <button id="closeAddModalBtn" class="modal-close" aria-label="Cerrar">x</button>
+      <h4 id="addModalTitle">Ingreso de Stock por IMEI</h4>
+      
+      <form id="addProductForm" class="user-form" autocomplete="off" style="margin-top: 15px;">
+        <label for="selectExistente">¿El modelo ya existe en la tienda?</label>
+        <select id="selectExistente" style="width:100%; padding:10px; border-radius:6px; margin-bottom:15px; border:1px solid var(--gray-300); font-weight:600;">
+          <option value="NUEVO">-- No, es un modelo NUEVO (Digitar todo) --</option>
+        </select>
+
+        <div id="wrapperNombreModelo">
+          <label for="prodName">Nombre del Celular (Modelo)</label>
+          <input id="prodName" name="name" type="text" placeholder="Ej: iPhone 16 Pro" />
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: rgba(0,0,0,0.02); padding: 10px; border-radius: 6px; margin-bottom: 12px; border: 1px dashed var(--gray-300);">
+          <div>
+            <label for="prodPriceUSD">Precio (USD $)</label>
+            <input id="prodPriceUSD" name="priceUSD" type="number" step="0.01" required placeholder="1000" />
+          </div>
+          <div>
+            <label>Calculado (BOB)</label>
+            <input id="prodPriceBOB" type="text" readonly style="background: var(--gray-200); font-weight: 700; color: #2a9d8f;" value="Bs. 0.00" />
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+          <div>
+            <label for="prodTipoIdentificador">Tipo de Código</label>
+            <select id="prodTipoIdentificador" name="tipoIdentificador" style="width:100%; padding:10px; border-radius:6px; border:1px solid var(--gray-300); font-weight:600; background: var(--white);">
+              <option value="IMEI">IMEI (Celulares)</option>
+              <option value="SERIAL">Número de Serial (Otros)</option>
+            </select>
+          </div>
+          <div>
+            <label id="labelIdentificador" for="prodImei">Código IMEI (Único)</label>
+            <input id="prodImei" name="imei" type="text" required placeholder="Solo números" pattern="[0-9]+" title="El IMEI debe contener únicamente números enteros." />
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;" id="rowAtributosFisicos">
+          <div>
+            <label for="prodColor">Color</label>
+            <input id="prodColor" name="color" type="text" required placeholder="Titanio Gris" />
+          </div>
+          <div id="wrapperStorage">
+            <label for="prodStorage">Almacenamiento (Número)</label>
+            <input id="prodStorage" name="almacenamiento" type="number" min="1" step="1" placeholder="Ej: 256" />
+          </div>
+          <div id="wrapperRam">
+            <label for="prodRam">Memoria RAM (Número)</label>
+            <input id="prodRam" name="ram" type="number" min="1" step="1" placeholder="Ej: 8" />
+          </div>
+        </div>
+
+        <div id="specsEspecificasContainer">
+          <label for="specPantalla">Especificación de Pantalla</label>
+          <input id="specPantalla" name="pantalla" type="text" placeholder="Ej: 6.3 pulgadas OLED" />
+
+          <label for="specCamara">Especificación de Cámara</label>
+          <input id="specCamara" name="camara" type="text" placeholder="Ej: 48 MP principal" />
+
+          <label for="specBateria">Batería</label>
+          <input id="specBateria" name="bateria" type="text" placeholder="Ej: 3561" />
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Guardar e Incrementar Stock</button>
+        <p id="addProductMessage" class="form-message" aria-live="polite"></p>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
