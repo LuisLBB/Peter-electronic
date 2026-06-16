@@ -91,7 +91,7 @@ if (prodPriceUSD) {
 
 async function fetchAndApplyExchangeRate() {
   try {
-    const response = await fetch("http://localhost:5000/api/exchange-rate");
+    const response = await fetch("https://peter-electronic-backend.onrender.com");
     const data = await response.json();
     currentGlobalExchangeRate = data.exchangeRate;
     
@@ -107,7 +107,7 @@ if (btnSaveExchange) {
     if (!globalExchangeInput) return;
     const newRate = parseFloat(globalExchangeInput.value) || 6.96;
     try {
-      const response = await fetch("http://localhost:5000/api/exchange-rate", {
+      const response = await fetch("https://peter-electronic-backend.onrender.com", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rate: newRate })
@@ -148,7 +148,7 @@ function showView(viewId) {
 async function renderHistoryTable() {
   if (!historyTableBody) return;
   try {
-    const response = await fetch("http://localhost:5000/api/history");
+    const response = await fetch("https://peter-electronic-backend.onrender.com");
     const historyData = await response.json();
 
     if (historyData.length === 0) {
