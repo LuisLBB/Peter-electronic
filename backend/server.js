@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://luislebo97_db_user:tengentopa678a9A2@cluster30.ha8qkxv.mongodb.net/?appName=Cluster30";
+const MONGO_URI = process.env.MONGO_URI;
 
 mongoose.connect(MONGO_URI)
   .then(() => console.log("Conectado exitosamente a MongoDB Atlas"))
@@ -62,7 +62,12 @@ const HistorySchema = new mongoose.Schema({
 });
 const History = mongoose.model("History", HistorySchema);
 
-app.use(cors());
+app.use(cors({
+  origin: ["https://luislbb.github.io", "http://127.0.0.1:5500", "http://localhost:5500"],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
 app.use(express.json());
 
 async function getExchangeRate() {

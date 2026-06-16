@@ -51,6 +51,7 @@ const prodPriceBOB = document.getElementById("prodPriceBOB");
 
 const searchInventoryInput = document.getElementById("searchInventoryInput");
 const searchSalesInput = document.getElementById("searchSalesInput");
+const API_BASE_URL = "https://peter-electronic-backend.onrender.com";
 
 let currentActiveGroupKey = null;
 let currentMaxAvailable = 0;
@@ -91,7 +92,7 @@ if (prodPriceUSD) {
 
 async function fetchAndApplyExchangeRate() {
   try {
-    const response = await fetch("https://peter-electronic-backend.onrender.com");
+    const response = await fetch(`${API_BASE_URL}/api/exchange-rate`);
     const data = await response.json();
     currentGlobalExchangeRate = data.exchangeRate;
     
@@ -107,7 +108,7 @@ if (btnSaveExchange) {
     if (!globalExchangeInput) return;
     const newRate = parseFloat(globalExchangeInput.value) || 6.96;
     try {
-      const response = await fetch("https://peter-electronic-backend.onrender.com", {
+      const response = await fetch(`${API_BASE_URL}/api/exchange-rate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rate: newRate })
@@ -148,7 +149,7 @@ function showView(viewId) {
 async function renderHistoryTable() {
   if (!historyTableBody) return;
   try {
-    const response = await fetch("https://peter-electronic-backend.onrender.com");
+    const response = await fetch(`${API_BASE_URL}/api/history`);
     const historyData = await response.json();
 
     if (historyData.length === 0) {
@@ -176,7 +177,7 @@ async function renderHistoryTable() {
 
 async function renderDashboard() {
   try {
-    const response = await fetch("http://localhost:5000/api/dashboard-stats");
+    const response = await fetch(`${API_BASE_URL}/api/dashboard-stats`);
     const stats = await response.json();
     if (statSales) statSales.textContent = stats.sales;
     if (statStock) statStock.textContent = stats.stock;
@@ -189,7 +190,7 @@ async function renderDashboard() {
 async function renderInventory() {
   if (!inventoryGrid) return;
   try {
-    const response = await fetch("http://localhost:5000/api/inventory");
+    const response = await fetch(`${API_BASE_URL}/api/inventory`);
     const inventory = await response.json();
 
     if (inventory.length === 0) {
@@ -226,7 +227,7 @@ async function renderInventory() {
         grouped[key].totalStock += 1;
         grouped[key].imeisDisponibles.push({ imei: item.imei, color: item.color });
         if (!grouped[key].colors.includes(item.color)) {
-        grouped[key].colors.push(item.color);
+          grouped[key].colors.push(item.color);
         }
       }
     });
@@ -269,7 +270,7 @@ if (searchInventoryInput) {
 async function populateModelsSelector() {
   if (!selectExistente) return;
   try {
-    const response = await fetch("http://localhost:5000/api/inventory");
+    const response = await fetch(`${API_BASE_URL}/api/inventory`);
     const inventory = await response.json();
 
     selectExistente.innerHTML = `<option value="NUEVO">-- No, es un modelo NUEVO (Digitar todo) --</option>`;
@@ -309,7 +310,7 @@ if (selectExistente) {
       if (prodRamOpt) prodRamOpt.required = false;
 
       try {
-        const response = await fetch("http://localhost:5000/api/inventory");
+        const response = await fetch(`${API_BASE_URL}/api/inventory`);
         const inventory = await response.json();
         const referenceItem = inventory.find(item => `${item.name}|${item.almacenamiento}|${item.ram}` === selectExistente.value);
         if (referenceItem && prodPriceUSD) {
@@ -343,7 +344,7 @@ if (selectExistente) {
 async function renderSalesHistoryView() {
   if (!salesListContainer) return;
   try {
-    const response = await fetch("http://localhost:5000/api/sales");
+    const response = await fetch(`${API_BASE_URL}/api/sales`);
     const salesData = await response.json();
 
     if (salesData.length === 0) {
@@ -420,7 +421,7 @@ if (btnProcessBulkSale) {
     const seller = sessionStorage.getItem("sellerName") || "Admin";
 
     try {
-      const response = await fetch("http://localhost:5000/api/sales", {
+      const response = await fetch(`${API_BASE_URL}/api/sales`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cartItems: globalCart, seller })
@@ -445,7 +446,7 @@ if (btnProcessBulkSale) {
 
 async function openProductModalByGroup(groupKey) {
   try {
-    const response = await fetch("http://localhost:5000/api/inventory");
+    const response = await fetch(`${API_BASE_URL}/api/inventory`);
     const inventory = await response.json();
 
     const matchingUnits = inventory.filter(item => `${item.name}|${item.almacenamiento}|${item.ram}` === groupKey);
@@ -545,14 +546,13 @@ if (btnAddToCart) {
       return;
     }
 
-    // Buscamos si este IMEI exacto ya fue añadido previamente al carrito global
     const existingIndex = globalCart.findIndex(i => i.imeiElegido === imeiSeleccionado);
     
     if (existingIndex === -1) {
       globalCart.push({
         groupKey: currentActiveGroupKey,
         name: modelName,
-        qty: 1, // Al elegir un IMEI específico, se procesa de 1 en 1 por unidad exacta
+        qty: 1, 
         imeiElegido: imeiSeleccionado
       });
     }
@@ -589,7 +589,7 @@ if (loginForm) {
     const password = formData.get("password").toString().trim();
 
     try {
-      const response = await fetch("http://localhost:5000/api/login", {
+      const response = await fetch(`${API_BASE_URL}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password })
@@ -599,9 +599,9 @@ if (loginForm) {
 
       if (response.ok && data.success) {
         sessionStorage.setItem("sellerName", data.user.name);
-        sessionStorage.setItem("userRole", data.user.role); //
+        sessionStorage.setItem("userRole", data.user.role); 
         
-        aplicarPermisosPorRol(); //
+        aplicarPermisosPorRol(); 
         
         if (loginOverlay) loginOverlay.classList.add("is-hidden");
         if (appShell) appShell.classList.remove("is-hidden");
@@ -652,7 +652,6 @@ if (openAddModalBtn) {
       selectExistente.dispatchEvent(new Event("change"));
     }
 
-    // --- NUEVA LÓGICA DE VALIDACIÓN DINÁMICA IMEI/SERIAL ---
     const selectorTipo = document.getElementById("prodTipoIdentificador");
     const labelIdentificador = document.getElementById("labelIdentificador");
     const inputImei = document.getElementById("prodImei");
@@ -663,20 +662,18 @@ if (openAddModalBtn) {
       inputImei.placeholder = "Solo números";
       inputImei.setAttribute("pattern", "[0-9]+");
 
-      // Escuchar cambios cuando el usuario interactúe con el selector
       selectorTipo.addEventListener("change", (e) => {
         if (e.target.value === "SERIAL") {
           labelIdentificador.textContent = "Número de Serial (Único)";
           inputImei.placeholder = "Ej: SN123XYZ";
-          inputImei.removeAttribute("pattern"); // Permite letras y números libremente
+          inputImei.removeAttribute("pattern"); 
         } else {
           labelIdentificador.textContent = "Código IMEI (Único)";
           inputImei.placeholder = "Solo números";
-          inputImei.setAttribute("pattern", "[0-9]+"); // Bloquea letras de nuevo
+          inputImei.setAttribute("pattern", "[0-9]+"); 
         }
       });
     }
-    // --------------------------------------------------------
 
     if (addModal) {
       addModal.classList.add("is-open");
@@ -724,7 +721,7 @@ if (addProductForm) {
     };
 
     try {
-      const response = await fetch("http://localhost:5000/api/inventory", {
+      const response = await fetch(`${API_BASE_URL}/api/inventory`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -761,7 +758,7 @@ if (addProductForm) {
 async function renderUsers() {
   if (!usersList) return;
   try {
-    const response = await fetch("http://localhost:5000/api/users");
+    const response = await fetch(`${API_BASE_URL}/api/users`);
     const registeredUsers = await response.json();
 
     usersList.innerHTML = registeredUsers
@@ -804,16 +801,16 @@ if (userForm) {
     event.preventDefault();
     const formData = new FormData(userForm);
     const fullName = formData.get("fullName").toString().trim();
-    const username = formData.get("newUsername").toString().trim(); // <-- CAPTURAR NUEVO USERNAME
+    const username = formData.get("newUsername").toString().trim(); 
     const email = formData.get("email").toString().trim();
-    const password = formData.get("newPassword").toString().trim(); // <-- CAPTURAR NUEVA CONTRASEÑA
+    const password = formData.get("newPassword").toString().trim(); 
     const role = formData.get("role").toString();
 
     try {
-      const response = await fetch("http://localhost:5000/api/users", {
+      const response = await fetch(`${API_BASE_URL}/api/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: fullName, username, email, password, role }) // <-- ENVIAR PAQUETE COMPLETO
+        body: JSON.stringify({ name: fullName, username, email, password, role }) 
       });
 
       const data = await response.json();
@@ -868,5 +865,16 @@ function aplicarPermisosPorRol() {
     if (btnGuardarCambio) btnGuardarCambio.style.display = "block";
   }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  const isLogged = sessionStorage.getItem("sellerName");
+  if (isLogged) {
+    if (loginOverlay) loginOverlay.classList.add("is-hidden");
+    if (appShell) appShell.classList.remove("is-hidden");
+    aplicarPermisosPorRol();
+  } else {
+    showLogin();
+  }
+});
 
 inicializarSistema();
