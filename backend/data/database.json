@@ -56,12 +56,13 @@
       "color": "Blanco",
       "almacenamiento": "512 GB",
       "ram": "12 GB",
-      "status": "Disponible",
+      "status": "Vendido",
       "specs": {
         "pantalla": "6,83 Pulgadas AMOLED",
         "camara": "50 mpx OIS + 8 mpx ultrawide",
         "bateria": "8500 mAh"
-      }
+      },
+      "exchangeRate": 6.96
     },
     {
       "id": 4,
@@ -83,14 +84,14 @@
     {
       "id": 5,
       "name": "iPhone 16 Pro Max",
-      "price": null,
+      "price": 9490,
       "priceUSD": 1364,
-      "exchangeRate": null,
+      "exchangeRate": 6.96,
       "imei": "854785698521453",
       "color": "Blanco Lunar",
       "almacenamiento": "256 GB",
       "ram": "8 GB",
-      "status": "Disponible",
+      "status": "Vendido",
       "specs": {
         "pantalla": "6.9 pulgadas OLED",
         "camara": "48 MP principal + 48 MP Ultra Wide",
@@ -168,14 +169,14 @@
     {
       "id": 10,
       "name": "Redmi Note 13 Pro + 5G",
-      "price": null,
+      "price": 1945,
       "priceUSD": 280,
-      "exchangeRate": null,
+      "exchangeRate": 6.96,
       "imei": "866547002600069",
       "color": "Blanco Lunar",
       "almacenamiento": "256 GB",
       "ram": "8 RAM",
-      "status": "Disponible",
+      "status": "Vendido",
       "specs": {
         "pantalla": "6.67 pulgada AMOLED",
         "camara": "200 MP OIS",
@@ -185,14 +186,14 @@
     {
       "id": 11,
       "name": "Redmi Note 13 Pro + 5G",
-      "price": null,
+      "price": 1945,
       "priceUSD": 280,
-      "exchangeRate": null,
+      "exchangeRate": 6.96,
       "imei": "865578490002689",
       "color": "Midnight Black",
       "almacenamiento": "256 GB",
       "ram": "8 RAM",
-      "status": "Disponible",
+      "status": "Vendido",
       "specs": {
         "pantalla": "6.67 pulgada AMOLED",
         "camara": "200 MP OIS",
@@ -215,6 +216,50 @@
           "color": "Titanio Desierto",
           "almacenamiento": "256 GB",
           "ram": "8 GB"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "datetime": "15/6/2026, 3:16:50 p. m.",
+      "seller": "Administrador General",
+      "totalPrice": 18180,
+      "products": [
+        {
+          "id": 10,
+          "name": "Redmi Note 13 Pro + 5G",
+          "price": 1945,
+          "imei": "866547002600069",
+          "color": "Blanco Lunar",
+          "almacenamiento": "256 GB",
+          "ram": "8 RAM"
+        },
+        {
+          "id": 11,
+          "name": "Redmi Note 13 Pro + 5G",
+          "price": 1945,
+          "imei": "865578490002689",
+          "color": "Midnight Black",
+          "almacenamiento": "256 GB",
+          "ram": "8 RAM"
+        },
+        {
+          "id": 5,
+          "name": "iPhone 16 Pro Max",
+          "price": 9490,
+          "imei": "854785698521453",
+          "color": "Blanco Lunar",
+          "almacenamiento": "256 GB",
+          "ram": "8 GB"
+        },
+        {
+          "id": 3,
+          "name": "Poco X8 Pro Max",
+          "price": 4800,
+          "imei": "864578123456789",
+          "color": "Blanco",
+          "almacenamiento": "512 GB",
+          "ram": "12 GB"
         }
       ]
     }
@@ -295,6 +340,34 @@
       "operation": "Ingreso de Equipo",
       "productName": "Redmi Note 13 Pro + 5G (Midnight Black)",
       "quantity": "IMEI: 865578490002689 ($280 USD a tc NaN)",
+      "responsible": "Administrador General"
+    },
+    {
+      "datetime": "15/6/2026, 3:16:50 p. m.",
+      "operation": "Venta (Reg Nro: 2)",
+      "productName": "Redmi Note 13 Pro + 5G [Blanco Lunar]",
+      "quantity": "IMEI: 866547002600069 (256 GB/8 RAM)",
+      "responsible": "Administrador General"
+    },
+    {
+      "datetime": "15/6/2026, 3:16:50 p. m.",
+      "operation": "Venta (Reg Nro: 2)",
+      "productName": "Redmi Note 13 Pro + 5G [Midnight Black]",
+      "quantity": "IMEI: 865578490002689 (256 GB/8 RAM)",
+      "responsible": "Administrador General"
+    },
+    {
+      "datetime": "15/6/2026, 3:16:50 p. m.",
+      "operation": "Venta (Reg Nro: 2)",
+      "productName": "iPhone 16 Pro Max [Blanco Lunar]",
+      "quantity": "IMEI: 854785698521453 (256 GB/8 GB)",
+      "responsible": "Administrador General"
+    },
+    {
+      "datetime": "15/6/2026, 3:16:50 p. m.",
+      "operation": "Venta (Reg Nro: 2)",
+      "productName": "Poco X8 Pro Max [Blanco]",
+      "quantity": "IMEI: 864578123456789 (512 GB/12 GB)",
       "responsible": "Administrador General"
     }
   ]
