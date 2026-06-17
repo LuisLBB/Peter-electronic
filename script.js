@@ -18,7 +18,8 @@ const modalBody = document.getElementById("modalBody");
 const modalTitle = document.getElementById("modalTitle");
 const closeModalBtn = document.getElementById("closeModalBtn");
 const sellMessage = document.getElementById("sellMessage");
-const inputSaleQty = document.getElementById("inputSaleQty");
+const cartPreviewPanel = document.getElementById("cartPreviewPanel");
+const cartPreviewList = document.getElementById("cartPreviewList");
 const btnAddToCart = document.getElementById("btnAddToCart");
 const modalActionContainer = document.getElementById("modalActionContainer");
 
@@ -404,6 +405,39 @@ if (searchSalesInput) {
 function updateCartButtonUI() {
   const totalUnits = globalCart.reduce((sum, item) => sum + item.qty, 0);
   if (cartCount) cartCount.textContent = totalUnits;
+  renderCartPreview();
+}
+
+function renderCartPreview() {
+  if (!cartPreviewPanel || !cartPreviewList) return;
+
+  if (globalCart.length === 0) {
+    cartPreviewPanel.style.display = "none";
+    cartPreviewList.innerHTML = "";
+    return;
+  }
+
+  cartPreviewPanel.style.display = "block";
+  cartPreviewList.innerHTML = globalCart
+    .map(item => `
+      <span style="display:inline-flex; align-items:center; gap:6px; background:white; border:1px solid #2a9d8f; border-radius:20px; padding:4px 10px; font-size:0.8rem; font-family:monospace;">
+        ${item.name} — ${item.imeiElegido}
+        <button type="button" data-remove-imei="${item.imeiElegido}" title="Quitar del carrito" style="background:none; border:none; color:#ef233c; font-weight:700; cursor:pointer; padding:0; line-height:1; font-size:1rem;">×</button>
+      </span>
+    `)
+    .join("");
+}
+
+if (cartPreviewList) {
+  cartPreviewList.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    if (target.matches("[data-remove-imei]")) {
+      const imeiToRemove = target.getAttribute("data-remove-imei");
+      globalCart = globalCart.filter(item => item.imeiElegido !== imeiToRemove);
+      updateCartButtonUI();
+    }
+  });
 }
 
 if (btnProcessBulkSale) {
@@ -459,7 +493,6 @@ async function openProductModalByGroup(groupKey) {
     currentActiveGroupKey = groupKey;
     currentMaxAvailable = availableUnits.length;
     if (sellMessage) sellMessage.textContent = "";
-    if (inputSaleQty) inputSaleQty.value = "1";
 
     if (modalTitle) modalTitle.textContent = baseItem.name;
     
@@ -507,7 +540,6 @@ async function openProductModalByGroup(groupKey) {
         modalActionContainer.style.display = "none";
       } else {
         modalActionContainer.style.display = "block";
-        if (inputSaleQty) inputSaleQty.max = currentMaxAvailable;
       }
     }
 
@@ -522,19 +554,7 @@ async function openProductModalByGroup(groupKey) {
 
 if (btnAddToCart) {
   btnAddToCart.addEventListener("click", () => {
-    if (!inputSaleQty || !sellMessage) return;
-    const qty = parseInt(inputSaleQty.value);
-    if (isNaN(qty) || qty <= 0) {
-      sellMessage.style.color = "red";
-      sellMessage.textContent = "Cantidad inválida.";
-      return;
-    }
-
-    if (qty > currentMaxAvailable) {
-      sellMessage.style.color = "red";
-      sellMessage.textContent = `Solo hay ${currentMaxAvailable} unidades disponibles.`;
-      return;
-    }
+    if (!sellMessage) return;
 
     const modelName = modalTitle ? modalTitle.textContent : "";
     const selectImeiEl = document.getElementById("selectImeiVenta");
@@ -547,20 +567,24 @@ if (btnAddToCart) {
     }
 
     const existingIndex = globalCart.findIndex(i => i.imeiElegido === imeiSeleccionado);
-    
-    if (existingIndex === -1) {
-      globalCart.push({
-        groupKey: currentActiveGroupKey,
-        name: modelName,
-        qty: 1, 
-        imeiElegido: imeiSeleccionado
-      });
+
+    if (existingIndex !== -1) {
+      sellMessage.style.color = "red";
+      sellMessage.textContent = "Ese IMEI ya está en el carrito.";
+      return;
     }
+
+    globalCart.push({
+      groupKey: currentActiveGroupKey,
+      name: modelName,
+      qty: 1,
+      imeiElegido: imeiSeleccionado
+    });
 
     updateCartButtonUI();
     sellMessage.style.color = "green";
-    sellMessage.textContent = `¡Añadidas ${qty} unidad(es) al carrito de forma exitosa!`;
-    
+    sellMessage.textContent = "¡Unidad añadida al carrito de forma exitosa!";
+
     setTimeout(() => {
       closeProductModal();
     }, 900);
