@@ -924,7 +924,10 @@ if (userForm) {
 
       const data = await response.json();
       if (!response.ok) {
-        if (userMessage) userMessage.textContent = data.message;
+        if (userMessage) {
+          userMessage.style.color = "red";
+          userMessage.textContent = data.message;
+        }
         return;
       }
       await renderUsers();

@@ -22,7 +22,9 @@ const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, required: true },
-  active: { type: Boolean, default: true }
+  active: { type: Boolean, default: true },
+  originalEmail: { type: String },
+  originalUsername: { type: String }
 });
 const User = mongoose.model("User", UserSchema);
 
@@ -421,6 +423,13 @@ app.delete("/api/users/:id", async (req, res) => {
     }
 
     user.active = false;
+    // Conservar los valores originales por trazabilidad, luego liberar correo y
+    // username para que puedan reutilizarse en un registro nuevo.
+    const sufijo = `__inactivo_${Date.now()}`;
+    user.originalEmail = user.email;
+    user.originalUsername = user.username;
+    user.email = `${user.email}${sufijo}`;
+    user.username = `${user.username}${sufijo}`;
     await user.save();
 
     res.json({ success: true, message: `Usuario ${user.name} desactivado correctamente.` });
@@ -433,12 +442,12 @@ app.post("/api/users", async (req, res) => {
   try {
     const { name, username, email, password, role } = req.body;
 
-    const duplicateEmail = await User.findOne({ email: email.toLowerCase() });
+    const duplicateEmail = await User.findOne({ email: email.toLowerCase(), active: { $ne: false } });
     if (duplicateEmail) {
       return res.status(400).json({ success: false, message: "Ese correo ya está registrado." });
     }
 
-    const duplicateUser = await User.findOne({ username: username.toLowerCase().trim() });
+    const duplicateUser = await User.findOne({ username: username.toLowerCase().trim(), active: { $ne: false } });
     if (duplicateUser) {
       return res.status(400).json({ success: false, message: "El nombre de usuario ya está en uso." });
     }
