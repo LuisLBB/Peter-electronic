@@ -353,7 +353,7 @@ function renderModelResults(filtro) {
   const texto = filtro.trim().toLowerCase();
 
   if (!texto) {
-    modelResultsList.innerHTML = `<div style="padding:12px; color:var(--gray-500); font-size:0.85rem; text-align:center;">Escribe el nombre de un modelo para buscarlo.</div>`;
+    modelResultsList.innerHTML = "";
     return;
   }
 
@@ -370,10 +370,10 @@ function renderModelResults(filtro) {
     return;
   }
 
-  modelResultsList.innerHTML = coincidencias
+  modelResultsList.innerHTML = `<div style="border:1px solid var(--gray-200); border-radius:6px; overflow:hidden;">` + coincidencias
     .map(m => `<div class="model-suggestion" data-value="${m.value}" data-label="${m.label}"
         style="padding:11px 12px; cursor:pointer; font-size:0.9rem; border-bottom:1px solid var(--gray-100); font-weight:600;">${m.label}</div>`)
-    .join("");
+    .join("") + `</div>`;
 }
 
 function seleccionarModelo(value, label) {
