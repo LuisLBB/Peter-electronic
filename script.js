@@ -331,34 +331,102 @@ async function populateModelsSelector() {
     modelos.sort((a, b) => a.label.localeCompare(b.label, "es", { sensitivity: "base" }));
     modelosDisponiblesCache = modelos;
 
-    renderModelOptions("");
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-function renderModelOptions(filtro) {
-  if (!selectExistente) return;
-  const texto = filtro.trim().toLowerCase();
-
-  selectExistente.innerHTML = `<option value="NUEVO">-- No, es un modelo NUEVO (Digitar todo) --</option>`;
-
-  modelosDisponiblesCache
-    .filter(m => m.label.toLowerCase().includes(texto))
-    .forEach(m => {
+    // Poblar el select oculto: es la "fuente de verdad" que lee el formulario al enviar
+    selectExistente.innerHTML = `<option value="NUEVO">-- No, es un modelo NUEVO (Digitar todo) --</option>`;
+    modelos.forEach(m => {
       const option = document.createElement("option");
       option.value = m.value;
       option.textContent = m.label;
       selectExistente.appendChild(option);
     });
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 const searchModelInput = document.getElementById("searchModelInput");
+const modelSuggestions = document.getElementById("modelSuggestions");
+const btnModeloNuevo = document.getElementById("btnModeloNuevo");
+const modelSeleccionadoLabel = document.getElementById("modelSeleccionadoLabel");
+
+function renderModelSuggestions(filtro) {
+  if (!modelSuggestions) return;
+  const texto = filtro.trim().toLowerCase();
+
+  if (!texto) {
+    modelSuggestions.style.display = "none";
+    modelSuggestions.innerHTML = "";
+    return;
+  }
+
+  const coincidencias = modelosDisponiblesCache.filter(m => m.label.toLowerCase().includes(texto));
+
+  if (coincidencias.length === 0) {
+    modelSuggestions.innerHTML = `<div style="padding:10px; color:var(--gray-500); font-size:0.85rem;">Sin coincidencias. Usa "Es un modelo NUEVO" si no existe.</div>`;
+    modelSuggestions.style.display = "block";
+    return;
+  }
+
+  modelSuggestions.innerHTML = coincidencias
+    .map(m => `<div class="model-suggestion" data-value="${m.value}" data-label="${m.label}"
+        style="padding:10px; cursor:pointer; font-size:0.9rem; border-bottom:1px solid var(--gray-100);">${m.label}</div>`)
+    .join("");
+  modelSuggestions.style.display = "block";
+}
+
+function seleccionarModelo(value, label) {
+  if (!selectExistente) return;
+  // Alimentar el select oculto y disparar su lógica de relleno de specs
+  selectExistente.value = value;
+  selectExistente.dispatchEvent(new Event("change"));
+
+  if (modelSuggestions) {
+    modelSuggestions.style.display = "none";
+    modelSuggestions.innerHTML = "";
+  }
+  if (searchModelInput) searchModelInput.value = "";
+
+  if (modelSeleccionadoLabel) {
+    if (value === "NUEVO") {
+      modelSeleccionadoLabel.style.display = "block";
+      modelSeleccionadoLabel.textContent = "✏️ Modelo nuevo: ingresa todos los datos abajo.";
+    } else {
+      modelSeleccionadoLabel.style.display = "block";
+      modelSeleccionadoLabel.textContent = `✓ Modelo seleccionado: ${label}`;
+    }
+  }
+}
+
 if (searchModelInput) {
   searchModelInput.addEventListener("input", () => {
-    renderModelOptions(searchModelInput.value);
+    renderModelSuggestions(searchModelInput.value);
   });
 }
+
+if (modelSuggestions) {
+  modelSuggestions.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    const opcion = target.closest(".model-suggestion");
+    if (!opcion) return;
+    seleccionarModelo(opcion.getAttribute("data-value"), opcion.getAttribute("data-label"));
+  });
+}
+
+if (btnModeloNuevo) {
+  btnModeloNuevo.addEventListener("click", () => {
+    seleccionarModelo("NUEVO", "");
+  });
+}
+
+// Cerrar las sugerencias al hacer clic fuera del buscador
+document.addEventListener("click", (event) => {
+  if (!modelSuggestions || !searchModelInput) return;
+  const target = event.target;
+  if (target instanceof Node && !searchModelInput.contains(target) && !modelSuggestions.contains(target)) {
+    modelSuggestions.style.display = "none";
+  }
+});
 
 if (selectExistente) {
   selectExistente.addEventListener("change", async () => {
@@ -743,6 +811,14 @@ if (openAddModalBtn) {
     if (addProductMessage) addProductMessage.textContent = "";
     const searchModelInputEl = document.getElementById("searchModelInput");
     if (searchModelInputEl) searchModelInputEl.value = "";
+    const modelSuggestionsEl = document.getElementById("modelSuggestions");
+    if (modelSuggestionsEl) {
+      modelSuggestionsEl.style.display = "none";
+      modelSuggestionsEl.innerHTML = "";
+    }
+    const modelSeleccionadoLabelEl = document.getElementById("modelSeleccionadoLabel");
+    if (modelSeleccionadoLabelEl) modelSeleccionadoLabelEl.style.display = "none";
+
     await populateModelsSelector();
     if (selectExistente) {
       selectExistente.value = "NUEVO";
