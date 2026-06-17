@@ -420,9 +420,9 @@ function renderCartPreview() {
   cartPreviewPanel.style.display = "block";
   cartPreviewList.innerHTML = globalCart
     .map(item => `
-      <span style="display:inline-flex; align-items:center; gap:6px; background:white; border:1px solid #2a9d8f; border-radius:20px; padding:4px 10px; font-size:0.8rem; font-family:monospace;">
-        ${item.name} — ${item.imeiElegido}
-        <button type="button" data-remove-imei="${item.imeiElegido}" title="Quitar del carrito" style="background:none; border:none; color:#ef233c; font-weight:700; cursor:pointer; padding:0; line-height:1; font-size:1rem;">×</button>
+      <span style="display:inline-flex; align-items:center; gap:8px; background:#ffffff; color:#1b4965; border-radius:20px; padding:5px 8px 5px 12px; font-size:0.8rem; font-family:monospace; font-weight:700; box-shadow:0 2px 6px rgba(0,0,0,0.15);">
+        ${item.name} (${item.color}) — ${item.imeiElegido}
+        <button type="button" data-remove-imei="${item.imeiElegido}" title="Quitar del carrito" style="background:#ef233c; color:white; border:none; border-radius:50%; width:18px; height:18px; font-weight:700; cursor:pointer; padding:0; line-height:1; font-size:0.75rem; display:flex; align-items:center; justify-content:center;">×</button>
       </span>
     `)
     .join("");
@@ -497,7 +497,7 @@ async function openProductModalByGroup(groupKey) {
     if (modalTitle) modalTitle.textContent = baseItem.name;
     
     const opcionesImeis = availableUnits.map(i => 
-      `<option value="${i.imei}">[Color: ${i.color}] — Nro: ${i.imei}</option>`
+      `<option value="${i.imei}" data-color="${i.color}">[Color: ${i.color}] — Nro: ${i.imei}</option>`
     ).join("");
 
     const selectImeiHTML = availableUnits.length > 0 
@@ -559,6 +559,8 @@ if (btnAddToCart) {
     const modelName = modalTitle ? modalTitle.textContent : "";
     const selectImeiEl = document.getElementById("selectImeiVenta");
     const imeiSeleccionado = selectImeiEl ? selectImeiEl.value : null;
+    const opcionSeleccionada = selectImeiEl ? selectImeiEl.options[selectImeiEl.selectedIndex] : null;
+    const colorSeleccionado = opcionSeleccionada ? opcionSeleccionada.getAttribute("data-color") : "";
 
     if (!imeiSeleccionado) {
       sellMessage.style.color = "red";
@@ -577,6 +579,7 @@ if (btnAddToCart) {
     globalCart.push({
       groupKey: currentActiveGroupKey,
       name: modelName,
+      color: colorSeleccionado,
       qty: 1,
       imeiElegido: imeiSeleccionado
     });
