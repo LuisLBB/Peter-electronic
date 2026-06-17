@@ -203,15 +203,11 @@
       
       <form id="addProductForm" class="user-form" autocomplete="off" style="margin-top: 15px;">
         <label for="searchModelInput">¿El modelo ya existe en la tienda?</label>
-        <div style="position:relative; margin-bottom:15px;">
-          <input id="searchModelInput" type="text" placeholder="🔍 Escribe para buscar un modelo existente..." autocomplete="off"
-            style="width:100%; padding:10px; border-radius:6px; border:1px solid var(--gray-300); font-weight:600;" />
-          <div id="modelSuggestions" style="display:none; position:absolute; top:100%; left:0; right:0; z-index:50; background:var(--white); border:1px solid var(--gray-300); border-top:none; border-radius:0 0 6px 6px; max-height:220px; overflow-y:auto; box-shadow:0 8px 18px rgba(0,0,0,0.12);"></div>
-          <button type="button" id="btnModeloNuevo" style="margin-top:8px; width:100%; padding:9px; border-radius:6px; border:1px dashed #2a9d8f; background:#eef8f6; color:#264653; font-weight:700; cursor:pointer; font-size:0.85rem;">
-            + Es un modelo NUEVO (digitar todo)
-          </button>
-          <p id="modelSeleccionadoLabel" style="display:none; margin-top:8px; font-size:0.85rem; font-weight:700; color:#2a9d8f;"></p>
-        </div>
+        <input id="searchModelInput" type="text" placeholder="🔍 Escribe para buscar un modelo existente..." autocomplete="off"
+          style="width:100%; padding:10px; border-radius:6px; border:1px solid var(--gray-300); font-weight:600;" />
+        <div id="modelResultsList" style="margin-top:8px; max-height:240px; overflow-y:auto; border:1px solid var(--gray-200); border-radius:6px;"></div>
+        <p id="modelSeleccionadoLabel" style="display:none; margin-top:8px; font-size:0.85rem; font-weight:700; color:#2a9d8f;"></p>
+        <div style="margin-bottom:15px;"></div>
         <select id="selectExistente" style="display:none;">
           <option value="NUEVO">-- No, es un modelo NUEVO (Digitar todo) --</option>
         </select>

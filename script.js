@@ -345,33 +345,35 @@ async function populateModelsSelector() {
 }
 
 const searchModelInput = document.getElementById("searchModelInput");
-const modelSuggestions = document.getElementById("modelSuggestions");
-const btnModeloNuevo = document.getElementById("btnModeloNuevo");
+const modelResultsList = document.getElementById("modelResultsList");
 const modelSeleccionadoLabel = document.getElementById("modelSeleccionadoLabel");
 
-function renderModelSuggestions(filtro) {
-  if (!modelSuggestions) return;
+function renderModelResults(filtro) {
+  if (!modelResultsList) return;
   const texto = filtro.trim().toLowerCase();
 
   if (!texto) {
-    modelSuggestions.style.display = "none";
-    modelSuggestions.innerHTML = "";
+    modelResultsList.innerHTML = `<div style="padding:12px; color:var(--gray-500); font-size:0.85rem; text-align:center;">Escribe el nombre de un modelo para buscarlo.</div>`;
     return;
   }
 
   const coincidencias = modelosDisponiblesCache.filter(m => m.label.toLowerCase().includes(texto));
 
   if (coincidencias.length === 0) {
-    modelSuggestions.innerHTML = `<div style="padding:10px; color:var(--gray-500); font-size:0.85rem;">Sin coincidencias. Usa "Es un modelo NUEVO" si no existe.</div>`;
-    modelSuggestions.style.display = "block";
+    modelResultsList.innerHTML = `
+      <div style="padding:14px; text-align:center;">
+        <p style="color:#ef233c; font-weight:700; font-size:0.9rem; margin-bottom:10px;">No existe ningún modelo con ese nombre.</p>
+        <button type="button" id="btnRegistrarNuevo" style="width:100%; padding:10px; border-radius:6px; border:1px dashed #2a9d8f; background:#eef8f6; color:#264653; font-weight:700; cursor:pointer; font-size:0.85rem;">
+          + Registrar "${filtro.trim()}" como modelo NUEVO
+        </button>
+      </div>`;
     return;
   }
 
-  modelSuggestions.innerHTML = coincidencias
+  modelResultsList.innerHTML = coincidencias
     .map(m => `<div class="model-suggestion" data-value="${m.value}" data-label="${m.label}"
-        style="padding:10px; cursor:pointer; font-size:0.9rem; border-bottom:1px solid var(--gray-100);">${m.label}</div>`)
+        style="padding:11px 12px; cursor:pointer; font-size:0.9rem; border-bottom:1px solid var(--gray-100); font-weight:600;">${m.label}</div>`)
     .join("");
-  modelSuggestions.style.display = "block";
 }
 
 function seleccionarModelo(value, label) {
@@ -380,18 +382,14 @@ function seleccionarModelo(value, label) {
   selectExistente.value = value;
   selectExistente.dispatchEvent(new Event("change"));
 
-  if (modelSuggestions) {
-    modelSuggestions.style.display = "none";
-    modelSuggestions.innerHTML = "";
-  }
   if (searchModelInput) searchModelInput.value = "";
+  if (modelResultsList) renderModelResults("");
 
   if (modelSeleccionadoLabel) {
+    modelSeleccionadoLabel.style.display = "block";
     if (value === "NUEVO") {
-      modelSeleccionadoLabel.style.display = "block";
       modelSeleccionadoLabel.textContent = "✏️ Modelo nuevo: ingresa todos los datos abajo.";
     } else {
-      modelSeleccionadoLabel.style.display = "block";
       modelSeleccionadoLabel.textContent = `✓ Modelo seleccionado: ${label}`;
     }
   }
@@ -399,34 +397,25 @@ function seleccionarModelo(value, label) {
 
 if (searchModelInput) {
   searchModelInput.addEventListener("input", () => {
-    renderModelSuggestions(searchModelInput.value);
+    renderModelResults(searchModelInput.value);
   });
 }
 
-if (modelSuggestions) {
-  modelSuggestions.addEventListener("click", (event) => {
+if (modelResultsList) {
+  modelResultsList.addEventListener("click", (event) => {
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
+
+    if (target.id === "btnRegistrarNuevo") {
+      seleccionarModelo("NUEVO", "");
+      return;
+    }
+
     const opcion = target.closest(".model-suggestion");
     if (!opcion) return;
     seleccionarModelo(opcion.getAttribute("data-value"), opcion.getAttribute("data-label"));
   });
 }
-
-if (btnModeloNuevo) {
-  btnModeloNuevo.addEventListener("click", () => {
-    seleccionarModelo("NUEVO", "");
-  });
-}
-
-// Cerrar las sugerencias al hacer clic fuera del buscador
-document.addEventListener("click", (event) => {
-  if (!modelSuggestions || !searchModelInput) return;
-  const target = event.target;
-  if (target instanceof Node && !searchModelInput.contains(target) && !modelSuggestions.contains(target)) {
-    modelSuggestions.style.display = "none";
-  }
-});
 
 if (selectExistente) {
   selectExistente.addEventListener("change", async () => {
@@ -811,15 +800,11 @@ if (openAddModalBtn) {
     if (addProductMessage) addProductMessage.textContent = "";
     const searchModelInputEl = document.getElementById("searchModelInput");
     if (searchModelInputEl) searchModelInputEl.value = "";
-    const modelSuggestionsEl = document.getElementById("modelSuggestions");
-    if (modelSuggestionsEl) {
-      modelSuggestionsEl.style.display = "none";
-      modelSuggestionsEl.innerHTML = "";
-    }
     const modelSeleccionadoLabelEl = document.getElementById("modelSeleccionadoLabel");
     if (modelSeleccionadoLabelEl) modelSeleccionadoLabelEl.style.display = "none";
 
     await populateModelsSelector();
+    renderModelResults("");
     if (selectExistente) {
       selectExistente.value = "NUEVO";
       selectExistente.dispatchEvent(new Event("change"));
