@@ -288,9 +288,13 @@ async function renderInventory() {
       return;
     }
 
+    // Orden alfabético por nombre de modelo (ignorando mayúsculas y acentos)
+    entries.sort((a, b) => a[1].name.localeCompare(b[1].name, "es", { sensitivity: "base" }));
+
     inventoryGrid.innerHTML = entries
       .map(([unusedKey, group]) => {
         const outOfStock = group.totalStock === 0;
+        const modelKey = `${group.name}|${group.almacenamiento}|${group.ram}`;
         return `
           <article class="product-card" style="border-left: 4px solid ${outOfStock ? "#ef233c" : "#2a9d8f"}">
             <h4>${group.name}</h4>
@@ -303,7 +307,10 @@ async function renderInventory() {
             <p style="margin: 8px 0; font-weight:700; color: ${outOfStock ? "#ef233c" : "#2a9d8f"}">
               ${outOfStock ? "SIN STOCK" : `Stock disponible: ${group.totalStock} uds`}
             </p>
-            <button class="btn btn-primary" style="margin-top:8px; padding: 6px 12px; font-size:0.85rem;" data-group-key="${group.name}|${group.almacenamiento}|${group.ram}">Ver Ficha Técnica</button>
+            <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
+              <button class="btn btn-primary" style="padding: 6px 12px; font-size:0.85rem;" data-group-key="${modelKey}">Ver Ficha Técnica</button>
+              <button class="btn" style="padding: 6px 12px; font-size:0.85rem; background:#ef233c; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:700;" data-delete-model="${modelKey}">Eliminar</button>
+            </div>
           </article>
         `;
       })
@@ -802,12 +809,42 @@ if (logoutBtn) {
 }
 
 if (inventoryGrid) {
-  inventoryGrid.addEventListener("click", (event) => {
+  inventoryGrid.addEventListener("click", async (event) => {
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
+
     if (target.matches("[data-group-key]")) {
       const key = target.getAttribute("data-group-key");
       openProductModalByGroup(key);
+      return;
+    }
+
+    if (target.matches("[data-delete-model]")) {
+      const modelKey = target.getAttribute("data-delete-model");
+      const partes = (modelKey || "").split("|");
+      const [name, almacenamiento, ram] = partes;
+
+      if (!confirm(`¿Eliminar el modelo "${name}" (${almacenamiento}/${ram}) del catálogo?\n\nDejará de mostrarse, pero las ventas e historial pasados se conservan.`)) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/inventory/hide-model`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, almacenamiento, ram })
+        });
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          await renderInventory();
+          await renderDashboard();
+        } else {
+          alert(data.message || "No se pudo eliminar el modelo.");
+        }
+      } catch (error) {
+        alert("Error de conexión con el servidor.");
+      }
     }
   });
 }

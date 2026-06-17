@@ -39,6 +39,7 @@ const ProductSchema = new mongoose.Schema({
   almacenamiento: { type: String, required: true },
   ram: { type: String, required: true },
   status: { type: String, default: "Disponible" },
+  hidden: { type: Boolean, default: false },
   specs: {
     pantalla: String,
     camara: String,
@@ -155,10 +156,34 @@ app.post("/api/exchange-rate", async (req, res) => {
 
 app.get("/api/inventory", async (req, res) => {
   try {
-    const inventory = await Product.find();
+    const inventory = await Product.find({ hidden: { $ne: true } });
     res.json(inventory);
   } catch (error) {
     res.status(500).json({ success: false, message: "Error al obtener inventario" });
+  }
+});
+
+app.post("/api/inventory/hide-model", async (req, res) => {
+  try {
+    const { name, almacenamiento, ram } = req.body;
+    if (!name || !almacenamiento || !ram) {
+      return res.status(400).json({ success: false, message: "Faltan datos para identificar el modelo." });
+    }
+
+    // Oculta todas las unidades de ese modelo (vendidas o disponibles).
+    // El borrado lógico conserva los registros de ventas e historial intactos.
+    const resultado = await Product.updateMany(
+      { name, almacenamiento, ram },
+      { hidden: true }
+    );
+
+    res.json({
+      success: true,
+      message: `Modelo ${name} (${almacenamiento}/${ram}) ocultado del catálogo.`,
+      modificados: resultado.modifiedCount
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error al ocultar el modelo." });
   }
 });
 
@@ -367,7 +392,7 @@ app.get("/api/dashboard-stats", async (req, res) => {
     const fechaFiltro = req.query.date || getLocalDateBO();
 
     const ventasDelDia = await Sale.find({ saleDate: fechaFiltro });
-    const inventory = await Product.find({ status: "Disponible" });
+    const inventory = await Product.find({ status: "Disponible", hidden: { $ne: true } });
 
     const totalSalesCount = ventasDelDia.reduce((acc, sale) => acc + sale.products.length, 0);
     const stockCount = inventory.length;
