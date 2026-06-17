@@ -21,7 +21,8 @@ const UserSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, required: true }
+  role: { type: String, required: true },
+  active: { type: Boolean, default: true }
 });
 const User = mongoose.model("User", UserSchema);
 
@@ -93,6 +94,9 @@ app.post("/api/login", async (req, res) => {
     
     const internalUser = await User.findOne({ username: username.toLowerCase().trim() });
     if (internalUser) {
+      if (internalUser.active === false) {
+        return res.status(403).json({ success: false, message: "Este usuario ha sido desactivado." });
+      }
       if (internalUser.password === password.trim()) {
         return res.json({ 
           success: true, 
@@ -391,10 +395,37 @@ app.get("/api/sales-dates", async (req, res) => {
 
 app.get("/api/users", async (req, res) => {
   try {
-    const users = await User.find();
+    const users = await User.find({ active: { $ne: false } });
     res.json(users);
   } catch (error) {
     res.status(500).json({ success: false, message: "Error al obtener usuarios" });
+  }
+});
+
+app.delete("/api/users/:id", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user || user.active === false) {
+      return res.status(404).json({ success: false, message: "El usuario no existe o ya fue desactivado." });
+    }
+
+    // Protección: no permitir desactivar al último administrador activo
+    if (user.role === "Administrador") {
+      const adminsActivos = await User.countDocuments({ role: "Administrador", active: { $ne: false } });
+      if (adminsActivos <= 1) {
+        return res.status(400).json({
+          success: false,
+          message: "No se puede eliminar al único administrador activo del sistema."
+        });
+      }
+    }
+
+    user.active = false;
+    await user.save();
+
+    res.json({ success: true, message: `Usuario ${user.name} desactivado correctamente.` });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error al eliminar el usuario." });
   }
 });
 

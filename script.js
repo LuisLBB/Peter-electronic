@@ -829,10 +829,16 @@ async function renderUsers() {
     usersList.innerHTML = registeredUsers
       .map(
         (user) => `
-          <li>
-            <strong>${user.name}</strong><br />
-            ${user.email}<br />
-            Rol: ${user.role}
+          <li style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+            <span>
+              <strong>${user.name}</strong><br />
+              ${user.email}<br />
+              Rol: ${user.role}
+            </span>
+            <button type="button" class="btn" data-delete-user="${user._id}" data-user-name="${user.name}"
+              style="background:#ef233c; color:white; border:none; border-radius:6px; padding:6px 12px; font-size:0.8rem; font-weight:700; cursor:pointer; white-space:nowrap;">
+              Eliminar
+            </button>
           </li>
         `
       )
@@ -840,6 +846,44 @@ async function renderUsers() {
   } catch (error) {
     console.error(error);
   }
+}
+
+if (usersList) {
+  usersList.addEventListener("click", async (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    if (!target.matches("[data-delete-user]")) return;
+
+    const userId = target.getAttribute("data-delete-user");
+    const userName = target.getAttribute("data-user-name") || "este usuario";
+
+    if (!confirm(`¿Seguro que deseas eliminar a ${userName}? El usuario quedará desactivado y no podrá iniciar sesión.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/${userId}`, { method: "DELETE" });
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        await renderUsers();
+        if (userMessage) {
+          userMessage.style.color = "green";
+          userMessage.textContent = data.message;
+        }
+      } else {
+        if (userMessage) {
+          userMessage.style.color = "red";
+          userMessage.textContent = data.message || "No se pudo eliminar el usuario.";
+        }
+      }
+    } catch (error) {
+      if (userMessage) {
+        userMessage.style.color = "red";
+        userMessage.textContent = "Error de conexión con el servidor.";
+      }
+    }
+  });
 }
 
 if (closeModalBtn) closeModalBtn.addEventListener("click", closeProductModal);
