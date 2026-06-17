@@ -161,17 +161,28 @@ async function renderHistoryTable() {
     }
 
     historyTableBody.innerHTML = historyData
-      .map(
-        (log) => `
-          <tr style="border-bottom: 1px solid var(--gray-200);">
-            <td style="padding: 12px;">${log.datetime}</td>
-            <td style="padding: 12px; font-weight: 600;">${log.operation}</td>
-            <td style="padding: 12px;">${log.productName}</td>
-            <td style="padding: 12px; font-family: monospace;">${log.quantity}</td>
+      .map((log, index) => {
+        const esVenta = (log.operation || "").toLowerCase().includes("venta");
+        // Colores de la paleta del sistema: teal para ingresos, rojo para ventas
+        const acento = esVenta ? "#ef233c" : "#2a9d8f";
+        const fondoBadge = esVenta ? "rgba(239,35,60,0.12)" : "rgba(42,157,143,0.12)";
+        const icono = esVenta ? "↑" : "↓";
+        const filaFondo = index % 2 === 0 ? "transparent" : "rgba(0,0,0,0.015)";
+
+        return `
+          <tr style="border-bottom: 1px solid var(--gray-200); background:${filaFondo}; border-left:4px solid ${acento};">
+            <td style="padding: 12px; font-size:0.88rem; color:var(--gray-700);">${log.datetime}</td>
+            <td style="padding: 12px;">
+              <span style="display:inline-flex; align-items:center; gap:6px; background:${fondoBadge}; color:${acento}; font-weight:700; font-size:0.8rem; padding:4px 10px; border-radius:20px; white-space:nowrap;">
+                ${icono} ${log.operation}
+              </span>
+            </td>
+            <td style="padding: 12px; font-weight: 600;">${log.productName}</td>
+            <td style="padding: 12px; font-family: monospace; font-size:0.85rem; color:var(--gray-700);">${log.quantity}</td>
             <td style="padding: 12px;">${log.responsible}</td>
           </tr>
-        `
-      )
+        `;
+      })
       .join("");
   } catch (error) {
     console.error(error);
@@ -544,12 +555,18 @@ function renderCartPreview() {
 
   cartPreviewPanel.style.display = "block";
   cartPreviewList.innerHTML = globalCart
-    .map(item => `
+    .map(item => {
+      const partes = (item.groupKey || "").split("|");
+      const almacenamiento = partes[1] || "";
+      const ram = partes[2] || "";
+      const specs = [almacenamiento, ram].filter(Boolean).join(" · ");
+      return `
       <span style="display:inline-flex; align-items:center; gap:8px; background:#ffffff; color:#1b4965; border-radius:20px; padding:5px 8px 5px 12px; font-size:0.8rem; font-family:monospace; font-weight:700; box-shadow:0 2px 6px rgba(0,0,0,0.15);">
-        ${item.name} (${item.color}) — ${item.imeiElegido}
+        ${item.name} (${item.color})${specs ? ` · ${specs}` : ""} — ${item.imeiElegido}
         <button type="button" data-remove-imei="${item.imeiElegido}" title="Quitar del carrito" style="background:#ef233c; color:white; border:none; border-radius:50%; width:18px; height:18px; font-weight:700; cursor:pointer; padding:0; line-height:1; font-size:0.75rem; display:flex; align-items:center; justify-content:center;">×</button>
       </span>
-    `)
+    `;
+    })
     .join("");
 }
 
