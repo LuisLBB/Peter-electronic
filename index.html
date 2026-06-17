@@ -26,6 +26,7 @@
         <button type="submit" class="btn btn-primary">Ingresar</button>
         <p id="loginError" class="form-error" aria-live="polite"></p>
       </form>
+      <p class="cred-note">Demo: usuario admin1 / clave peter123</p>
     </div>
   </div>
 
@@ -202,7 +203,9 @@
       
       <form id="addProductForm" class="user-form" autocomplete="off" style="margin-top: 15px;">
         <label for="selectExistente">¿El modelo ya existe en la tienda?</label>
-        <select id="selectExistente" style="width:100%; padding:10px; border-radius:6px; margin-bottom:15px; border:1px solid var(--gray-300); font-weight:600;">
+        <input id="searchModelInput" type="text" placeholder="🔍 Buscar modelo existente..." autocomplete="off"
+          style="width:100%; padding:9px 10px; border-radius:6px; margin-bottom:6px; border:1px solid var(--gray-300); font-weight:500;" />
+        <select id="selectExistente" size="1" style="width:100%; padding:10px; border-radius:6px; margin-bottom:15px; border:1px solid var(--gray-300); font-weight:600;">
           <option value="NUEVO">-- No, es un modelo NUEVO (Digitar todo) --</option>
         </select>
 

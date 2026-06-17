@@ -306,28 +306,58 @@ if (searchInventoryInput) {
   searchInventoryInput.addEventListener("input", renderInventory);
 }
 
+let modelosDisponiblesCache = [];
+
 async function populateModelsSelector() {
   if (!selectExistente) return;
   try {
     const response = await fetch(`${API_BASE_URL}/inventory`);
     const inventory = await response.json();
 
-    selectExistente.innerHTML = `<option value="NUEVO">-- No, es un modelo NUEVO (Digitar todo) --</option>`;
-
     const uniqueKeys = new Set();
+    const modelos = [];
     inventory.forEach(item => {
       const key = `${item.name}|${item.almacenamiento}|${item.ram}`;
       if (!uniqueKeys.has(key)) {
         uniqueKeys.add(key);
-        const option = document.createElement("option");
-        option.value = key;
-        option.textContent = `${item.name} (${item.almacenamiento} / ${item.ram})`;
-        selectExistente.appendChild(option);
+        modelos.push({
+          value: key,
+          label: `${item.name} (${item.almacenamiento} / ${item.ram})`
+        });
       }
     });
+
+    // Orden alfabético por nombre del modelo (sin distinguir mayúsculas/acentos)
+    modelos.sort((a, b) => a.label.localeCompare(b.label, "es", { sensitivity: "base" }));
+    modelosDisponiblesCache = modelos;
+
+    renderModelOptions("");
   } catch (error) {
     console.error(error);
   }
+}
+
+function renderModelOptions(filtro) {
+  if (!selectExistente) return;
+  const texto = filtro.trim().toLowerCase();
+
+  selectExistente.innerHTML = `<option value="NUEVO">-- No, es un modelo NUEVO (Digitar todo) --</option>`;
+
+  modelosDisponiblesCache
+    .filter(m => m.label.toLowerCase().includes(texto))
+    .forEach(m => {
+      const option = document.createElement("option");
+      option.value = m.value;
+      option.textContent = m.label;
+      selectExistente.appendChild(option);
+    });
+}
+
+const searchModelInput = document.getElementById("searchModelInput");
+if (searchModelInput) {
+  searchModelInput.addEventListener("input", () => {
+    renderModelOptions(searchModelInput.value);
+  });
 }
 
 if (selectExistente) {
@@ -711,6 +741,8 @@ if (inventoryGrid) {
 if (openAddModalBtn) {
   openAddModalBtn.addEventListener("click", async () => {
     if (addProductMessage) addProductMessage.textContent = "";
+    const searchModelInputEl = document.getElementById("searchModelInput");
+    if (searchModelInputEl) searchModelInputEl.value = "";
     await populateModelsSelector();
     if (selectExistente) {
       selectExistente.value = "NUEVO";
