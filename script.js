@@ -165,7 +165,7 @@ async function renderHistoryTable() {
         const acento = esVenta ? "#ef233c" : "#2a9d8f";
         const fondoBadge = esVenta ? "rgba(239,35,60,0.12)" : "rgba(42,157,143,0.12)";
         const icono = esVenta ? "↑" : "↓";
-        const filaFondo = index % 2 === 0 ? "transparent" : "rgba(0,0,0,0.015)";
+        const filaFondo = index % 2 === 0 ? "transparent" : "rgba(255,255,255,0.03)";
 
         return `
           <tr style="border-bottom: 1px solid var(--gray-200); background:${filaFondo}; border-left:4px solid ${acento};">
@@ -265,10 +265,10 @@ function renderCalendar() {
     if (esFuturo) {
       estilo += " color:var(--gray-300); cursor:not-allowed; background:transparent;";
     } else if (esSeleccionado) {
-      estilo += " background:#2a9d8f; color:white; cursor:pointer;";
+      estilo += " background:linear-gradient(145deg, var(--red), var(--red-dark)); color:white; cursor:pointer; box-shadow:0 0 10px rgba(255,42,61,0.4);";
     } else {
-      estilo += " color:#264653; cursor:pointer; background:rgba(42,157,143,0.08);";
-      if (esHoy) estilo += " border:1px solid #2a9d8f;";
+      estilo += " color:var(--gray-900); cursor:pointer; background:rgba(255,42,61,0.08);";
+      if (esHoy) estilo += " border:1px solid var(--red);";
     }
 
     const attr = esFuturo ? "" : `data-cal-day="${fechaStr}"`;
@@ -460,7 +460,7 @@ function renderModelResults(filtro) {
     modelResultsList.innerHTML = `
       <div style="padding:14px; text-align:center;">
         <p style="color:#ef233c; font-weight:700; font-size:0.9rem; margin-bottom:10px;">No existe ningún modelo con ese nombre.</p>
-        <button type="button" id="btnRegistrarNuevo" style="width:100%; padding:10px; border-radius:6px; border:1px dashed #2a9d8f; background:#eef8f6; color:#264653; font-weight:700; cursor:pointer; font-size:0.85rem;">
+        <button type="button" id="btnRegistrarNuevo" style="width:100%; padding:10px; border-radius:6px; border:1px dashed var(--red); background:rgba(255,42,61,0.1); color:var(--red-neon); font-weight:700; cursor:pointer; font-size:0.85rem;">
           + Registrar "${filtro.trim()}" como modelo NUEVO
         </button>
       </div>`;
@@ -571,19 +571,21 @@ async function renderSalesHistoryView() {
     const salesData = await response.json();
 
     if (salesData.length === 0) {
-      salesListContainer.innerHTML = `<p style="text-align:center; padding:20px; background:var(--white); border-radius:8px;">No existen registros de ventas consolidadas.</p>`;
+      salesListContainer.innerHTML = `<p style="text-align:center; padding:20px; background:var(--bg-elev-2); border-radius:8px;">No existen registros de ventas consolidadas.</p>`;
       return;
     }
 
     const filterText = searchSalesInput ? searchSalesInput.value.trim().toLowerCase() : "";
 
-    const filteredSales = salesData.filter(sale => {
-      if (!filterText) return true;
-      return sale.products.some(p => p.name.toLowerCase().includes(filterText));
-    });
+    const filteredSales = salesData
+      .filter(sale => {
+        if (!filterText) return true;
+        return sale.products.some(p => p.name.toLowerCase().includes(filterText));
+      })
+      .sort((a, b) => b.id - a.id); // Más reciente primero
 
     if (filteredSales.length === 0) {
-      salesListContainer.innerHTML = `<p style="text-align:center; padding:20px; background:var(--white); border-radius:8px;">Ningún registro de venta coincide con el modelo buscado.</p>`;
+      salesListContainer.innerHTML = `<p style="text-align:center; padding:20px; background:var(--bg-elev-2); border-radius:8px;">Ningún registro de venta coincide con el modelo buscado.</p>`;
       return;
     }
 
@@ -591,22 +593,22 @@ async function renderSalesHistoryView() {
       .map((sale) => {
         const productsHTML = sale.products
           .map(p => `
-            <div style="padding: 8px; background: rgba(0,0,0,0.02); border-radius: 6px; display: flex; flex-wrap: wrap; justify-content: space-between; font-size: 0.9rem; border-left: 3px solid var(--gray-900);">
-              <div><strong>${p.name}</strong> (${p.color}) - <span style="font-family: monospace;">Nro/ID: ${p.imei}</span></div>
-              <div>Var: ${p.almacenamiento} / ${p.ram} | <strong style="color:var(--gray-900);">${currencyFormatter.format(p.price)}</strong></div>
+            <div style="padding: 8px; background: rgba(255,255,255,0.04); border-radius: 6px; display: flex; flex-wrap: wrap; justify-content: space-between; font-size: 0.9rem; border-left: 3px solid var(--red); color: var(--gray-700);">
+              <div><strong style="color: var(--gray-900);">${p.name}</strong> (${p.color}) - <span style="font-family: monospace;">Nro/ID: ${p.imei}</span></div>
+              <div>Var: ${p.almacenamiento} / ${p.ram} | <strong style="color:var(--red-neon);">${currencyFormatter.format(p.price)}</strong></div>
             </div>
           `).join("");
 
         return `
-          <div style="background: var(--white); padding: 18px; border-radius: var(--radius-md); box-shadow: var(--soft-shadow); border: 1px solid var(--gray-200);">
+          <div style="background: var(--bg-elev-2); padding: 18px; border-radius: var(--radius-md); box-shadow: var(--soft-shadow); border: 1px solid var(--border-line);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px dashed var(--gray-200); padding-bottom: 8px;">
               <div>
-                <span style="background: var(--gray-900); color: var(--white); padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 0.85rem;">REGISTRO # ${sale.id}</span>
-                <span style="margin-left: 10px; font-size: 0.9rem; color: var(--gray-600);">${sale.datetime}</span>
+                <span style="background: linear-gradient(145deg, var(--red), var(--red-dark)); color: var(--white); padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 0.85rem;">REGISTRO # ${sale.id}</span>
+                <span style="margin-left: 10px; font-size: 0.9rem; color: var(--gray-500);">${sale.datetime}</span>
               </div>
-              <div style="font-size: 1.1rem; font-weight: 700;">Total: <span style="color:#2a9d8f;">${currencyFormatter.format(sale.totalPrice)}</span></div>
+              <div style="font-size: 1.1rem; font-weight: 700; color: var(--gray-900);">Total: <span style="color:var(--red-neon);">${currencyFormatter.format(sale.totalPrice)}</span></div>
             </div>
-            <div style="font-size:0.9rem; margin-bottom:8px;"><strong>Responsable de Operación:</strong> ${sale.seller}</div>
+            <div style="font-size:0.9rem; margin-bottom:8px; color: var(--gray-700);"><strong style="color: var(--gray-900);">Responsable de Operación:</strong> ${sale.seller}</div>
             <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px;">
               <div style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-500); font-weight:700;">Artículos incluidos en el Registro:</div>
               ${productsHTML}
@@ -748,16 +750,16 @@ async function openProductModalByGroup(groupKey) {
         <p><strong>Ficha de Pantalla:</strong> ${baseItem.specs.pantalla}</p>
         <p><strong>Cámara:</strong> ${baseItem.specs.camara}</p>
         <p><strong>Batería:</strong> ${baseItem.specs.bateria}</p>
-        <p><strong>Precio del Terminal:</strong> <strong style="color:#2a9d8f; font-size:1.1rem;">${currencyFormatter.format(liveBOB)} BOB</strong> (${usdFormatter.format(usdVal)} USD)</p>
-        <p style="margin-bottom:4px;"><strong>Stock Neto Disponible:</strong> <span style="font-weight:700; color:green;">${currentMaxAvailable} unidades</span></p>
+        <p><strong>Precio del Terminal:</strong> <strong style="color:var(--red-neon); font-size:1.1rem;">${currencyFormatter.format(liveBOB)} BOB</strong> (${usdFormatter.format(usdVal)} USD)</p>
+        <p style="margin-bottom:4px;"><strong>Stock Neto Disponible:</strong> <span style="font-weight:700; color:#3ddc84;">${currentMaxAvailable} unidades</span></p>
         
-        <div style="margin: 12px 0; padding: 10px; background: #eef8f6; border-radius: 6px; border-left: 4px solid #2a9d8f;">
+        <div style="margin: 12px 0; padding: 10px; background: rgba(255,42,61,0.08); border-radius: 6px; border-left: 4px solid var(--red);">
           <label for="selectImeiVenta" style="display:block; font-weight:700; font-size:0.85rem; margin-bottom:4px; color:var(--gray-700);">SELECCIONAR IDENTIFICADOR (IMEI/SERIAL) A VENDER:</label>
           ${selectImeiHTML}
         </div>
 
-        <div style="display:flex; flex-direction:column; gap:6px; background:rgba(0,0,0,0.02); padding:10px; border-radius:6px;">
-          <strong style="font-size:0.8rem; color:var(--gray-600);">Trazabilidad de Identificadores vinculados a este modelo:</strong>
+        <div style="display:flex; flex-direction:column; gap:6px; background:rgba(255,255,255,0.04); padding:10px; border-radius:6px;">
+          <strong style="font-size:0.8rem; color:var(--gray-500);">Trazabilidad de Identificadores vinculados a este modelo:</strong>
           <div style="display:flex; flex-wrap:wrap; gap:6px;">${imeisListHTML}</div>
         </div>
       `;
