@@ -20,8 +20,6 @@ const closeModalBtn = document.getElementById("closeModalBtn");
 const sellMessage = document.getElementById("sellMessage");
 const cartPreviewPanel = document.getElementById("cartPreviewPanel");
 const cartPreviewList = document.getElementById("cartPreviewList");
-const dashboardDate = document.getElementById("dashboardDate");
-const btnDashboardToday = document.getElementById("btnDashboardToday");
 const btnAddToCart = document.getElementById("btnAddToCart");
 const modalActionContainer = document.getElementById("modalActionContainer");
 
@@ -189,11 +187,16 @@ async function renderHistoryTable() {
   }
 }
 
+// Estado del calendario del dashboard
+let fechaSeleccionada = "";   // "YYYY-MM-DD" actualmente elegida
+let hoyBO = "";               // fecha de hoy según Bolivia (tope máximo)
+let calVisibleYear = 0;       // año del mes mostrado en la cuadrícula
+let calVisibleMonth = 0;      // mes (0-11) mostrado en la cuadrícula
+
 async function renderDashboard() {
   try {
-    const fecha = dashboardDate && dashboardDate.value ? dashboardDate.value : "";
-    const url = fecha
-      ? `${API_BASE_URL}/dashboard-stats?date=${fecha}`
+    const url = fechaSeleccionada
+      ? `${API_BASE_URL}/dashboard-stats?date=${fechaSeleccionada}`
       : `${API_BASE_URL}/dashboard-stats`;
     const response = await fetch(url);
     const stats = await response.json();
@@ -206,36 +209,112 @@ async function renderDashboard() {
 }
 
 async function initDashboardCalendar() {
-  if (!dashboardDate) return;
+  const calGrid = document.getElementById("calGrid");
+  if (!calGrid) return;
   try {
     const response = await fetch(`${API_BASE_URL}/sales-dates`);
     const data = await response.json();
-    const hoy = data.today;
-    // El atributo max impide seleccionar días futuros (quedan inhabilitados en el calendario)
-    dashboardDate.max = hoy;
-    if (!dashboardDate.value) dashboardDate.value = hoy;
+    hoyBO = data.today;
   } catch (error) {
-    console.error(error);
+    // Respaldo: calcular hoy en el cliente si el servidor no responde
+    hoyBO = new Intl.DateTimeFormat("en-CA", { timeZone: "America/La_Paz", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
   }
+
+  fechaSeleccionada = hoyBO;
+  const [anio, mes] = hoyBO.split("-").map(Number);
+  calVisibleYear = anio;
+  calVisibleMonth = mes - 1;
+  renderCalendar();
 }
 
-if (dashboardDate) {
-  dashboardDate.addEventListener("change", () => {
-    if (dashboardDate.max && dashboardDate.value > dashboardDate.max) {
-      dashboardDate.value = dashboardDate.max;
+function renderCalendar() {
+  const calGrid = document.getElementById("calGrid");
+  const calMonthLabel = document.getElementById("calMonthLabel");
+  if (!calGrid) return;
+
+  const nombresMes = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+  if (calMonthLabel) calMonthLabel.textContent = `${nombresMes[calVisibleMonth]} ${calVisibleYear}`;
+
+  const diasSemana = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
+  let html = diasSemana
+    .map(d => `<div style="text-align:center; font-size:0.7rem; font-weight:700; color:var(--gray-500); padding:4px 0;">${d}</div>`)
+    .join("");
+
+  const primerDia = new Date(calVisibleYear, calVisibleMonth, 1);
+  // getDay(): 0=domingo..6=sábado. Lo convertimos a lunes=0..domingo=6
+  let offset = primerDia.getDay() - 1;
+  if (offset < 0) offset = 6;
+
+  const diasEnMes = new Date(calVisibleYear, calVisibleMonth + 1, 0).getDate();
+
+  // Celdas vacías antes del día 1
+  for (let i = 0; i < offset; i++) {
+    html += `<div></div>`;
+  }
+
+  for (let dia = 1; dia <= diasEnMes; dia++) {
+    const mm = String(calVisibleMonth + 1).padStart(2, "0");
+    const dd = String(dia).padStart(2, "0");
+    const fechaStr = `${calVisibleYear}-${mm}-${dd}`;
+
+    const esFuturo = fechaStr > hoyBO;
+    const esSeleccionado = fechaStr === fechaSeleccionada;
+    const esHoy = fechaStr === hoyBO;
+
+    let estilo = "text-align:center; padding:8px 0; border-radius:6px; font-size:0.85rem; font-weight:600;";
+    if (esFuturo) {
+      estilo += " color:var(--gray-300); cursor:not-allowed; background:transparent;";
+    } else if (esSeleccionado) {
+      estilo += " background:#2a9d8f; color:white; cursor:pointer;";
+    } else {
+      estilo += " color:#264653; cursor:pointer; background:rgba(42,157,143,0.08);";
+      if (esHoy) estilo += " border:1px solid #2a9d8f;";
     }
-    renderDashboard();
-  });
+
+    const attr = esFuturo ? "" : `data-cal-day="${fechaStr}"`;
+    html += `<div ${attr} style="${estilo}">${dia}</div>`;
+  }
+
+  calGrid.innerHTML = html;
 }
 
-if (btnDashboardToday) {
-  btnDashboardToday.addEventListener("click", () => {
-    if (dashboardDate && dashboardDate.max) {
-      dashboardDate.value = dashboardDate.max;
+(function bindCalendarControls() {
+  const calPrev = document.getElementById("calPrevMonth");
+  const calNext = document.getElementById("calNextMonth");
+  const calGrid = document.getElementById("calGrid");
+
+  if (calPrev) {
+    calPrev.addEventListener("click", () => {
+      calVisibleMonth--;
+      if (calVisibleMonth < 0) { calVisibleMonth = 11; calVisibleYear--; }
+      renderCalendar();
+    });
+  }
+
+  if (calNext) {
+    calNext.addEventListener("click", () => {
+      // No permitir navegar más allá del mes actual
+      const [anioHoy, mesHoy] = hoyBO.split("-").map(Number);
+      const yaEnMesActual = (calVisibleYear === anioHoy && calVisibleMonth === mesHoy - 1);
+      if (yaEnMesActual) return;
+      calVisibleMonth++;
+      if (calVisibleMonth > 11) { calVisibleMonth = 0; calVisibleYear++; }
+      renderCalendar();
+    });
+  }
+
+  if (calGrid) {
+    calGrid.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      const fecha = target.getAttribute("data-cal-day");
+      if (!fecha) return;
+      fechaSeleccionada = fecha;
+      renderCalendar();
       renderDashboard();
-    }
-  });
-}
+    });
+  }
+})();
 
 async function renderInventory() {
   if (!inventoryGrid) return;
@@ -529,7 +608,7 @@ async function renderSalesHistoryView() {
             </div>
             <div style="font-size:0.9rem; margin-bottom:8px;"><strong>Responsable de Operación:</strong> ${sale.seller}</div>
             <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px;">
-              <div style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-500); font-weight:700;">Artículos incluidos in el Registro:</div>
+              <div style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-500); font-weight:700;">Artículos incluidos en el Registro:</div>
               ${productsHTML}
             </div>
           </div>
