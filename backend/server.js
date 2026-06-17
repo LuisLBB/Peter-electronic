@@ -47,6 +47,7 @@ const Product = mongoose.model("Product", ProductSchema);
 const SaleSchema = new mongoose.Schema({
   id: { type: Number, unique: true },
   datetime: String,
+  saleDate: String,
   seller: String,
   totalPrice: Number,
   products: Array
@@ -73,6 +74,17 @@ app.use(express.json());
 async function getExchangeRate() {
   const rateConfig = await Config.findOne({ key: "exchangeRate" });
   return rateConfig ? parseFloat(rateConfig.value) : 6.96;
+}
+
+function getLocalDateBO(date = new Date()) {
+  // Devuelve la fecha en formato YYYY-MM-DD según la zona horaria de Bolivia
+  const partes = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/La_Paz",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(date);
+  return partes; // en-CA ya entrega "YYYY-MM-DD"
 }
 
 app.post("/api/login", async (req, res) => {
@@ -240,6 +252,7 @@ app.post("/api/sales", async (req, res) => {
     }
 
     const currentDatetime = new Date().toLocaleString("es-BO", { timeZone: "America/La_Paz" });
+    const currentSaleDate = getLocalDateBO();
     const lastSale = await Sale.findOne().sort({ id: -1 });
     const newSaleId = lastSale ? lastSale.id + 1 : 1;
     const currentExchangeRate = await getExchangeRate();
@@ -286,6 +299,7 @@ app.post("/api/sales", async (req, res) => {
     const newSale = new Sale({
       id: newSaleId,
       datetime: currentDatetime,
+      saleDate: currentSaleDate,
       seller: seller || "Desconocido",
       totalPrice: totalSalePrice,
       products: itemsSoldSummary
@@ -316,18 +330,62 @@ app.get("/api/history", async (req, res) => {
   }
 });
 
+// Convierte el datetime viejo en texto ("16/6/2026, 14:30:25") a "YYYY-MM-DD"
+function parseLegacyDatetime(datetime) {
+  if (!datetime || typeof datetime !== "string") return null;
+  const fechaParte = datetime.split(",")[0].trim(); // "16/6/2026"
+  const partes = fechaParte.split("/");
+  if (partes.length !== 3) return null;
+  const dia = partes[0].padStart(2, "0");
+  const mes = partes[1].padStart(2, "0");
+  const anio = partes[2];
+  return `${anio}-${mes}-${dia}`;
+}
+
+// Asegura que toda venta tenga saleDate (migra las viejas la primera vez que se consultan)
+async function backfillSaleDates() {
+  const sinFecha = await Sale.find({ $or: [{ saleDate: { $exists: false } }, { saleDate: null }, { saleDate: "" }] });
+  for (const sale of sinFecha) {
+    const fecha = parseLegacyDatetime(sale.datetime);
+    if (fecha) {
+      sale.saleDate = fecha;
+      await sale.save();
+    }
+  }
+}
+
 app.get("/api/dashboard-stats", async (req, res) => {
   try {
-    const salesHistory = await Sale.find();
+    await backfillSaleDates();
+
+    const fechaFiltro = req.query.date || getLocalDateBO();
+
+    const ventasDelDia = await Sale.find({ saleDate: fechaFiltro });
     const inventory = await Product.find({ status: "Disponible" });
 
-    const totalSalesCount = salesHistory.reduce((acc, sale) => acc + sale.products.length, 0);
+    const totalSalesCount = ventasDelDia.reduce((acc, sale) => acc + sale.products.length, 0);
     const stockCount = inventory.length;
-    const totalRevenue = salesHistory.reduce((acc, sale) => acc + sale.totalPrice, 0);
+    const totalRevenue = ventasDelDia.reduce((acc, sale) => acc + sale.totalPrice, 0);
 
-    res.json({ sales: totalSalesCount, stock: stockCount, revenue: totalRevenue });
+    res.json({
+      sales: totalSalesCount,
+      stock: stockCount,
+      revenue: totalRevenue,
+      date: fechaFiltro
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: "Error al calcular estadísticas" });
+  }
+});
+
+app.get("/api/sales-dates", async (req, res) => {
+  try {
+    await backfillSaleDates();
+    const sales = await Sale.find({}, "saleDate");
+    const fechas = [...new Set(sales.map(s => s.saleDate).filter(Boolean))];
+    res.json({ dates: fechas, today: getLocalDateBO() });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error al obtener fechas de ventas" });
   }
 });
 

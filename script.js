@@ -20,6 +20,8 @@ const closeModalBtn = document.getElementById("closeModalBtn");
 const sellMessage = document.getElementById("sellMessage");
 const cartPreviewPanel = document.getElementById("cartPreviewPanel");
 const cartPreviewList = document.getElementById("cartPreviewList");
+const dashboardDate = document.getElementById("dashboardDate");
+const btnDashboardToday = document.getElementById("btnDashboardToday");
 const btnAddToCart = document.getElementById("btnAddToCart");
 const modalActionContainer = document.getElementById("modalActionContainer");
 
@@ -178,7 +180,11 @@ async function renderHistoryTable() {
 
 async function renderDashboard() {
   try {
-    const response = await fetch(`${API_BASE_URL}/dashboard-stats`);
+    const fecha = dashboardDate && dashboardDate.value ? dashboardDate.value : "";
+    const url = fecha
+      ? `${API_BASE_URL}/dashboard-stats?date=${fecha}`
+      : `${API_BASE_URL}/dashboard-stats`;
+    const response = await fetch(url);
     const stats = await response.json();
     if (statSales) statSales.textContent = stats.sales;
     if (statStock) statStock.textContent = stats.stock;
@@ -186,6 +192,38 @@ async function renderDashboard() {
   } catch (error) {
     console.error(error);
   }
+}
+
+async function initDashboardCalendar() {
+  if (!dashboardDate) return;
+  try {
+    const response = await fetch(`${API_BASE_URL}/sales-dates`);
+    const data = await response.json();
+    const hoy = data.today;
+    // El atributo max impide seleccionar días futuros (quedan inhabilitados en el calendario)
+    dashboardDate.max = hoy;
+    if (!dashboardDate.value) dashboardDate.value = hoy;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+if (dashboardDate) {
+  dashboardDate.addEventListener("change", () => {
+    if (dashboardDate.max && dashboardDate.value > dashboardDate.max) {
+      dashboardDate.value = dashboardDate.max;
+    }
+    renderDashboard();
+  });
+}
+
+if (btnDashboardToday) {
+  btnDashboardToday.addEventListener("click", () => {
+    if (dashboardDate && dashboardDate.max) {
+      dashboardDate.value = dashboardDate.max;
+      renderDashboard();
+    }
+  });
 }
 
 async function renderInventory() {
@@ -862,6 +900,7 @@ if (userForm) {
 
 async function inicializarSistema() {
   await fetchAndApplyExchangeRate();
+  await initDashboardCalendar();
   await renderDashboard();
   await renderInventory();
   await renderUsers();  
