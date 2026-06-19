@@ -1294,46 +1294,50 @@ inicializarSistema();
 // Guarda la instancia del escáner activo para poder detenerlo después
 let html5QrScanner = null;
 
-// Abre la cámara y empieza a buscar un código de barras
+// Abre la cámara a pantalla completa y empieza a buscar un código de barras
 async function iniciarEscaner() {
-  const scannerContainer = document.getElementById("scannerContainer");
+  const scannerOverlay = document.getElementById("scannerOverlay");
   const scannerMsg = document.getElementById("scannerMsg");
   const inputImei = document.getElementById("prodImei");
 
-  // Verificar que la librería se haya cargado
   if (typeof Html5Qrcode === "undefined") {
     if (scannerMsg) scannerMsg.textContent = "No se pudo cargar el lector. Revisa tu conexión.";
-    if (scannerContainer) scannerContainer.style.display = "block";
+    if (scannerOverlay) scannerOverlay.style.display = "block";
     return;
   }
 
-  if (scannerContainer) scannerContainer.style.display = "block";
-  if (scannerMsg) scannerMsg.textContent = "Apunta la cámara al código de barras...";
+  if (scannerOverlay) scannerOverlay.style.display = "block";
+  if (scannerMsg) scannerMsg.textContent = "Alinea el código de barras con la línea roja";
 
   html5QrScanner = new Html5Qrcode("scannerView");
 
   try {
     await html5QrScanner.start(
-      { facingMode: "environment" }, // cámara trasera en celulares
-      { fps: 10, qrbox: { width: 250, height: 120 } },
+      { facingMode: "environment" },
+      {
+        fps: 10,
+        // Franja angosta y horizontal: solo lee lo que cruza la zona central (la línea)
+        qrbox: (anchoVista, altoVista) => {
+          const ancho = Math.floor(Math.min(anchoVista, 460) * 0.9);
+          return { width: ancho, height: 130 };
+        },
+        aspectRatio: window.innerHeight / window.innerWidth
+      },
       (textoLeido) => {
-        // Éxito: se leyó un código
-        if (inputImei) inputImei.value = textoLeido.replace(/\D/g, ""); // solo números
+        if (inputImei) inputImei.value = textoLeido.replace(/\D/g, "");
         if (scannerMsg) scannerMsg.textContent = `✓ Código leído: ${textoLeido}`;
         detenerEscaner();
       },
-      () => {
-        // Llamado continuamente mientras no encuentra código; lo ignoramos
-      }
+      () => {}
     );
   } catch (error) {
     if (scannerMsg) scannerMsg.textContent = "No se pudo abrir la cámara. Revisa los permisos del navegador.";
   }
 }
 
-// Detiene la cámara y oculta el recuadro
+// Detiene la cámara y cierra el overlay de pantalla completa
 async function detenerEscaner() {
-  const scannerContainer = document.getElementById("scannerContainer");
+  const scannerOverlay = document.getElementById("scannerOverlay");
   if (html5QrScanner) {
     try {
       await html5QrScanner.stop();
@@ -1343,9 +1347,8 @@ async function detenerEscaner() {
     }
     html5QrScanner = null;
   }
-  if (scannerContainer) {
-    // Pequeño retraso para que se vea el mensaje de éxito antes de cerrar
-    setTimeout(() => { scannerContainer.style.display = "none"; }, 1200);
+  if (scannerOverlay) {
+    setTimeout(() => { scannerOverlay.style.display = "none"; }, 900);
   }
 }
 
