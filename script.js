@@ -1,3 +1,9 @@
+// ============================================================
+//  PETER ELECTRONIC - Lógica del Frontend (cliente)
+//  Se comunica con el backend (Node/Express) vía la API REST.
+// ============================================================
+
+// ---- REFERENCIAS A ELEMENTOS DEL DOM (login, navegación) ----
 const loginOverlay = document.getElementById("loginOverlay");
 const appShell = document.getElementById("app");
 const loginForm = document.getElementById("loginForm");
@@ -52,12 +58,15 @@ const prodPriceBOB = document.getElementById("prodPriceBOB");
 
 const searchInventoryInput = document.getElementById("searchInventoryInput");
 const searchSalesInput = document.getElementById("searchSalesInput");
+// ---- CONFIGURACIÓN GLOBAL Y ESTADO DE LA APLICACIÓN ----
+// URL base del backend desplegado en Render. Todas las peticiones parten de aquí.
 const API_BASE_URL = "https://peter-electronic-backend.onrender.com/api";
 
-let currentActiveGroupKey = null;
-let currentMaxAvailable = 0;
-let globalCart = [];
-let currentGlobalExchangeRate = 6.96;
+// Variables de estado: guardan datos en memoria mientras se usa la app
+let currentActiveGroupKey = null;   // modelo abierto actualmente en el modal
+let currentMaxAvailable = 0;        // stock disponible del modelo abierto
+let globalCart = [];                // carrito de venta (IMEIs seleccionados)
+let currentGlobalExchangeRate = 6.96; // tipo de cambio USD->BOB en uso
 
 const usdFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -71,6 +80,11 @@ const currencyFormatter = new Intl.NumberFormat("es-BO", {
   minimumFractionDigits: 0
 });
 
+// ============================================================
+//  TIPO DE CAMBIO (conversión USD -> Bolivianos)
+// ============================================================
+
+// Redondea el precio en bolivianos al múltiplo de 5 más cercano hacia abajo
 function redondearCostoComercial(valorDolares, tipoCambio) {
   const exactBOB = valorDolares * tipoCambio;
   return Math.floor(exactBOB / 5) * 5;
@@ -91,6 +105,7 @@ if (prodPriceUSD) {
   prodPriceUSD.addEventListener("input", calcularPrecioFormulario);
 }
 
+// Pide al backend el tipo de cambio actual (GET) y lo aplica en pantalla
 async function fetchAndApplyExchangeRate() {
   try {
     const response = await fetch(`${API_BASE_URL}/exchange-rate`);
@@ -132,6 +147,11 @@ if (btnSaveExchange) {
   });
 }
 
+// ============================================================
+//  NAVEGACIÓN ENTRE VISTAS (inicio, inventario, ventas, etc.)
+// ============================================================
+
+// Muestra la vista pedida y oculta las demás
 function showView(viewId) {
   views.forEach((view) => {
     view.classList.toggle("is-visible", view.id === viewId);
@@ -147,6 +167,11 @@ function showView(viewId) {
   }
 }
 
+// ============================================================
+//  HISTORIAL DE MOVIMIENTOS (auditoría de ingresos y ventas)
+// ============================================================
+
+// Pide el historial al backend (GET) y lo pinta como tabla con colores por tipo
 async function renderHistoryTable() {
   if (!historyTableBody) return;
   try {
@@ -188,11 +213,16 @@ async function renderHistoryTable() {
 }
 
 // Estado del calendario del dashboard
+// ============================================================
+//  RESUMEN EJECUTIVO: DASHBOARD + CALENDARIO POR DÍA
+// ============================================================
+
 let fechaSeleccionada = "";   // "YYYY-MM-DD" actualmente elegida
 let hoyBO = "";               // fecha de hoy según Bolivia (tope máximo)
 let calVisibleYear = 0;       // año del mes mostrado en la cuadrícula
 let calVisibleMonth = 0;      // mes (0-11) mostrado en la cuadrícula
 
+// Pide al backend las estadísticas del día seleccionado y actualiza las tarjetas
 async function renderDashboard() {
   try {
     const url = fechaSeleccionada
@@ -316,6 +346,11 @@ function renderCalendar() {
   }
 })();
 
+// ============================================================
+//  INVENTARIO (catálogo de modelos agrupados por IMEI)
+// ============================================================
+
+// Pide el inventario al backend, agrupa los IMEIs por modelo y pinta las tarjetas
 async function renderInventory() {
   if (!inventoryGrid) return;
   try {
@@ -403,8 +438,10 @@ if (searchInventoryInput) {
   searchInventoryInput.addEventListener("input", renderInventory);
 }
 
+// ---- AUTOCOMPLETADO: búsqueda de modelos al ingresar stock ----
 let modelosDisponiblesCache = [];
 
+// Carga la lista de modelos existentes (ordenados) para el buscador
 async function populateModelsSelector() {
   if (!selectExistente) return;
   try {
@@ -564,6 +601,11 @@ if (selectExistente) {
   });
 }
 
+// ============================================================
+//  REGISTRO DE VENTAS (lista de ventas consolidadas)
+// ============================================================
+
+// Pide las ventas al backend, las ordena de la más reciente a la más antigua y las pinta
 async function renderSalesHistoryView() {
   if (!salesListContainer) return;
   try {
@@ -626,6 +668,11 @@ if (searchSalesInput) {
   searchSalesInput.addEventListener("input", renderSalesHistoryView);
 }
 
+// ============================================================
+//  CARRITO DE VENTA GLOBAL (IMEIs seleccionados a vender)
+// ============================================================
+
+// Actualiza el contador del carrito y refresca la vista previa
 function updateCartButtonUI() {
   const totalUnits = globalCart.reduce((sum, item) => sum + item.qty, 0);
   if (cartCount) cartCount.textContent = totalUnits;
@@ -708,6 +755,8 @@ if (btnProcessBulkSale) {
   });
 }
 
+// ---- MODAL DE FICHA TÉCNICA / VENTA DE UN MODELO ----
+// Abre el modal con los datos del modelo y su lista de IMEIs disponibles
 async function openProductModalByGroup(groupKey) {
   try {
     const response = await fetch(`${API_BASE_URL}/inventory`);
@@ -824,6 +873,11 @@ if (btnAddToCart) {
   });
 }
 
+// ============================================================
+//  AUTENTICACIÓN (login / logout) Y CIERRE DE MODALES
+// ============================================================
+
+// Muestra la pantalla de login y oculta la app
 function showLogin() {
   if (loginOverlay) loginOverlay.classList.remove("is-hidden");
   if (appShell) appShell.classList.add("is-hidden");
@@ -982,6 +1036,7 @@ if (closeAddModalBtn) {
       addModal.setAttribute("aria-hidden", "true");
     }
     if (addProductForm) addProductForm.reset();
+    detenerEscaner(); // apagar la cámara si quedó abierta
   });
 }
 
@@ -1048,6 +1103,11 @@ if (addProductForm) {
   });
 }
 
+// ============================================================
+//  GESTIÓN DE USUARIOS (listar, registrar, eliminar)
+// ============================================================
+
+// Pide los usuarios activos al backend y los pinta con su botón de eliminar
 async function renderUsers() {
   if (!usersList) return;
   try {
@@ -1173,6 +1233,11 @@ if (userForm) {
   });
 }
 
+// ============================================================
+//  INICIALIZACIÓN DEL SISTEMA (arranque y permisos por rol)
+// ============================================================
+
+// Carga todos los datos iniciales al entrar a la app, en orden
 async function inicializarSistema() {
   await fetchAndApplyExchangeRate();
   await initDashboardCalendar();
@@ -1183,6 +1248,7 @@ async function inicializarSistema() {
   showView("inicio");
 }
 
+// Oculta o muestra opciones según el rol (Vendedor ve menos que Administrador)
 function aplicarPermisosPorRol() {
   const rol = sessionStorage.getItem("userRole");
   const navUsuarios = document.querySelector('.nav-link[data-view="usuarios"]');
@@ -1207,6 +1273,7 @@ function aplicarPermisosPorRol() {
   }
 }
 
+// Punto de entrada: al cargar la página, decide si mostrar login o la app
 document.addEventListener("DOMContentLoaded", () => {
   const isLogged = sessionStorage.getItem("sellerName");
   if (isLogged) {
@@ -1219,3 +1286,75 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 inicializarSistema();
+
+// ============================================================
+//  ESCÁNER DE CÓDIGO DE BARRAS (cámara -> rellena el IMEI)
+// ============================================================
+
+// Guarda la instancia del escáner activo para poder detenerlo después
+let html5QrScanner = null;
+
+// Abre la cámara y empieza a buscar un código de barras
+async function iniciarEscaner() {
+  const scannerContainer = document.getElementById("scannerContainer");
+  const scannerMsg = document.getElementById("scannerMsg");
+  const inputImei = document.getElementById("prodImei");
+
+  // Verificar que la librería se haya cargado
+  if (typeof Html5Qrcode === "undefined") {
+    if (scannerMsg) scannerMsg.textContent = "No se pudo cargar el lector. Revisa tu conexión.";
+    if (scannerContainer) scannerContainer.style.display = "block";
+    return;
+  }
+
+  if (scannerContainer) scannerContainer.style.display = "block";
+  if (scannerMsg) scannerMsg.textContent = "Apunta la cámara al código de barras...";
+
+  html5QrScanner = new Html5Qrcode("scannerView");
+
+  try {
+    await html5QrScanner.start(
+      { facingMode: "environment" }, // cámara trasera en celulares
+      { fps: 10, qrbox: { width: 250, height: 120 } },
+      (textoLeido) => {
+        // Éxito: se leyó un código
+        if (inputImei) inputImei.value = textoLeido.replace(/\D/g, ""); // solo números
+        if (scannerMsg) scannerMsg.textContent = `✓ Código leído: ${textoLeido}`;
+        detenerEscaner();
+      },
+      () => {
+        // Llamado continuamente mientras no encuentra código; lo ignoramos
+      }
+    );
+  } catch (error) {
+    if (scannerMsg) scannerMsg.textContent = "No se pudo abrir la cámara. Revisa los permisos del navegador.";
+  }
+}
+
+// Detiene la cámara y oculta el recuadro
+async function detenerEscaner() {
+  const scannerContainer = document.getElementById("scannerContainer");
+  if (html5QrScanner) {
+    try {
+      await html5QrScanner.stop();
+      await html5QrScanner.clear();
+    } catch (error) {
+      // Si ya estaba detenido, no pasa nada
+    }
+    html5QrScanner = null;
+  }
+  if (scannerContainer) {
+    // Pequeño retraso para que se vea el mensaje de éxito antes de cerrar
+    setTimeout(() => { scannerContainer.style.display = "none"; }, 1200);
+  }
+}
+
+const btnEscanearImei = document.getElementById("btnEscanearImei");
+if (btnEscanearImei) {
+  btnEscanearImei.addEventListener("click", iniciarEscaner);
+}
+
+const btnCerrarScanner = document.getElementById("btnCerrarScanner");
+if (btnCerrarScanner) {
+  btnCerrarScanner.addEventListener("click", detenerEscaner);
+}
