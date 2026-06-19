@@ -246,11 +246,6 @@
               <input id="prodImei" name="imei" type="text" required placeholder="Solo números" pattern="[0-9]+" title="El IMEI debe contener únicamente números enteros." style="flex:1;" />
               <button type="button" id="btnEscanearImei" title="Escanear código de barras con la cámara" style="background:var(--red-dark); color:white; border:none; border-radius:6px; padding:0 12px; cursor:pointer; font-size:1.1rem; white-space:nowrap;">📷</button>
             </div>
-            <div id="scannerContainer" style="display:none; margin-top:10px;">
-              <div id="scannerView" style="width:100%; max-width:320px; border-radius:8px; overflow:hidden; border:2px solid var(--red);"></div>
-              <button type="button" id="btnCerrarScanner" style="margin-top:6px; background:var(--bg-elev-3); color:var(--gray-900); border:1px solid var(--border-line); border-radius:6px; padding:6px 12px; cursor:pointer; font-size:0.85rem;">Cerrar cámara</button>
-              <p id="scannerMsg" style="font-size:0.8rem; color:var(--gray-500); margin-top:4px;"></p>
-            </div>
           </div>
         </div>
 
@@ -284,6 +279,15 @@
         <p id="addProductMessage" class="form-message" aria-live="polite"></p>
       </form>
     </div>
+  </div>
+
+  <div id="scannerOverlay" style="display:none; position:fixed; inset:0; z-index:9999; background:#000;">
+    <div id="scannerView" style="width:100%; height:100%;"></div>
+    <div id="scannerFrame" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:min(85vw, 460px); height:150px; border:2px solid rgba(255,255,255,0.5); border-radius:10px; box-shadow:0 0 0 9999px rgba(0,0,0,0.45); pointer-events:none;">
+      <div style="position:absolute; top:50%; left:0; right:0; height:3px; background:#ff2a3d; box-shadow:0 0 10px #ff2a3d; transform:translateY(-50%);"></div>
+    </div>
+    <p id="scannerMsg" style="position:absolute; top:14%; left:0; right:0; text-align:center; color:#fff; font-size:0.95rem; font-weight:600; text-shadow:0 1px 4px #000; padding:0 16px;">Alinea el código de barras con la línea roja</p>
+    <button type="button" id="btnCerrarScanner" style="position:absolute; bottom:8%; left:50%; transform:translateX(-50%); background:var(--red-dark); color:white; border:none; border-radius:8px; padding:12px 28px; cursor:pointer; font-size:1rem; font-weight:700; box-shadow:0 4px 14px rgba(0,0,0,0.5);">Cerrar cámara</button>
   </div>
 
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
