@@ -1293,12 +1293,16 @@ inicializarSistema();
 
 // Guarda la instancia del escáner activo para poder detenerlo después
 let html5QrScanner = null;
+let ultimaLecturaImei = "";   // último código detectado, a la espera de confirmación
 
-// Abre la cámara a pantalla completa y empieza a buscar un código de barras
+// Abre la cámara a pantalla completa y muestra los códigos detectados para confirmar
 async function iniciarEscaner() {
   const scannerOverlay = document.getElementById("scannerOverlay");
   const scannerMsg = document.getElementById("scannerMsg");
-  const inputImei = document.getElementById("prodImei");
+  const btnUsarCodigo = document.getElementById("btnUsarCodigo");
+
+  ultimaLecturaImei = "";
+  if (btnUsarCodigo) btnUsarCodigo.style.display = "none";
 
   if (typeof Html5Qrcode === "undefined") {
     if (scannerMsg) scannerMsg.textContent = "No se pudo cargar el lector. Revisa tu conexión.";
@@ -1316,17 +1320,21 @@ async function iniciarEscaner() {
       { facingMode: "environment" },
       {
         fps: 10,
-        // Franja angosta y horizontal: solo lee lo que cruza la zona central (la línea)
-        qrbox: (anchoVista, altoVista) => {
+        qrbox: (anchoVista) => {
           const ancho = Math.floor(Math.min(anchoVista, 460) * 0.9);
           return { width: ancho, height: 130 };
         },
         aspectRatio: window.innerHeight / window.innerWidth
       },
       (textoLeido) => {
-        if (inputImei) inputImei.value = textoLeido.replace(/\D/g, "");
-        if (scannerMsg) scannerMsg.textContent = `✓ Código leído: ${textoLeido}`;
-        detenerEscaner();
+        // No rellena ni cierra: solo muestra lo leído y espera confirmación
+        const soloNumeros = textoLeido.replace(/\D/g, "");
+        ultimaLecturaImei = soloNumeros;
+        if (scannerMsg) scannerMsg.textContent = `Código detectado: ${soloNumeros}`;
+        if (btnUsarCodigo) {
+          btnUsarCodigo.textContent = `✓ Usar este código (${soloNumeros})`;
+          btnUsarCodigo.style.display = "inline-block";
+        }
       },
       () => {}
     );
@@ -1335,9 +1343,19 @@ async function iniciarEscaner() {
   }
 }
 
+// Confirma la última lectura: la pone en el campo de IMEI y cierra la cámara
+function confirmarLecturaImei() {
+  const inputImei = document.getElementById("prodImei");
+  if (ultimaLecturaImei && inputImei) {
+    inputImei.value = ultimaLecturaImei;
+  }
+  detenerEscaner();
+}
+
 // Detiene la cámara y cierra el overlay de pantalla completa
 async function detenerEscaner() {
   const scannerOverlay = document.getElementById("scannerOverlay");
+  const btnUsarCodigo = document.getElementById("btnUsarCodigo");
   if (html5QrScanner) {
     try {
       await html5QrScanner.stop();
@@ -1347,9 +1365,8 @@ async function detenerEscaner() {
     }
     html5QrScanner = null;
   }
-  if (scannerOverlay) {
-    setTimeout(() => { scannerOverlay.style.display = "none"; }, 900);
-  }
+  if (btnUsarCodigo) btnUsarCodigo.style.display = "none";
+  if (scannerOverlay) scannerOverlay.style.display = "none";
 }
 
 const btnEscanearImei = document.getElementById("btnEscanearImei");
@@ -1360,4 +1377,9 @@ if (btnEscanearImei) {
 const btnCerrarScanner = document.getElementById("btnCerrarScanner");
 if (btnCerrarScanner) {
   btnCerrarScanner.addEventListener("click", detenerEscaner);
+}
+
+const btnUsarCodigo = document.getElementById("btnUsarCodigo");
+if (btnUsarCodigo) {
+  btnUsarCodigo.addEventListener("click", confirmarLecturaImei);
 }
